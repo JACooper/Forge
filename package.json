@@ -1,0 +1,24 @@
+{
+  "name": "forge",
+  "version": "1.0.0",
+  "description": "Task tracker & todo list app that curates task suggestions based on user provided difficulty.",
+  "main": "./src/app.js",
+  "scripts": {
+    "test": "echo \"Tests complete\""
+  },
+  "author": "Jesse Cooper",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "compression": "^1.7.0",
+    "connect-redis": "^3.3.0",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.3",
+    "express-session": "^1.15.4",
+    "mongoose": "^4.11.4",
+    "passport": "^0.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
