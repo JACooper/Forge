@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema({
 
 // passport-local-mongoose automatically adds username, hash, and salt fields
 // Also adds serializeUser, deserializeUser, and authenticate methods
-UserSchema.plugin(passportLocalMongoose);
+UserSchema.plugin(passportLocalMongoose, {usernameField: 'email'});
 
 UserModel = mongoose.model('User', UserSchema);
 

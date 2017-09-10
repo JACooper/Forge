@@ -1,9 +1,17 @@
 {
   "name": "forge",
   "version": "1.0.0",
+  "engines": {
+    "node": "7.5.0",
+    "npm": "4.1.2"
+  },
   "description": "Task tracker & todo list app that curates task suggestions based on user provided difficulty.",
   "main": "./src/app.js",
   "scripts": {
+    "nodemon": "nodemon --watch ./src ./src/app.js",
+    "start": "node ./src/app.js",
+    "start-debug": "node --inspect ./src/app.js",
+    "pretest": "eslint ./src --fix",
     "test": "echo \"Tests complete\""
   },
   "author": "Jesse Cooper",
@@ -16,7 +24,8 @@
     "express": "^4.15.3",
     "express-session": "^1.15.4",
     "mongoose": "^4.11.4",
-    "passport": "^0.3.2"
+    "passport": "^0.3.2",
+    "passport-local-mongoose": "^4.2.1"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"
