@@ -7,10 +7,16 @@ const createTask = (_request, _response) => {
   const response = _response;
 
   const title = request.body.task.title;
+  const time = request.body.task.time;
+  const effort = request.body.task.effort;
+  const focus = request.body.task.focus;
 
   const taskData = {
     user: request.user._id,
     title,
+    time,
+    effort,
+    focus,
   };
 
   const newTask = new Task.TaskModel(taskData);
