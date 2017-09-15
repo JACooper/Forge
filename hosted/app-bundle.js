@@ -26124,7 +26124,8 @@ exports.default = reduce;
 var initialState = {
   showTaskForm: false,
   sortType: 'ascending',
-  sortBy: 'sum,'
+  sortBy: 'sum',
+  emphasis: 'none'
 };
 
 function reduce() {
@@ -26149,6 +26150,10 @@ function reduce() {
     case 'CHANGE_SORT_BY':
       return _extends({}, state, {
         sortBy: action.data.sortBy
+      });
+    case 'CHANGE_EMPHASIS':
+      return _extends({}, state, {
+        emphasis: action.data.emphasis
       });
   }
 
@@ -26303,7 +26308,8 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
     addTaskSuccess: store.task.addTaskSuccess,
     showTaskForm: store.view.showTaskForm,
     sortType: store.view.sortType,
-    sortBy: store.view.sortBy
+    sortBy: store.view.sortBy,
+    emphasis: store.view.emphasis
   };
 }), _dec(_class = function (_React$Component) {
   _inherits(App, _React$Component);
@@ -26318,8 +26324,10 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
     _this.submitTask = _this.submitTask.bind(_this);
     _this.getTasks = _this.getTasks.bind(_this);
     _this.logout = _this.logout.bind(_this);
+
     _this.changeSortType = _this.changeSortType.bind(_this);
     _this.changeSortBy = _this.changeSortBy.bind(_this);
+    _this.changeEmphasis = _this.changeEmphasis.bind(_this);
     return _this;
   }
 
@@ -26353,8 +26361,10 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
           shouldUpdate: this.props.shouldGetTasks,
           changeSortType: this.changeSortType,
           changeSortBy: this.changeSortBy,
+          changeEmphasis: this.changeEmphasis,
           sortTypeValue: this.props.sortType,
-          sortByValue: this.props.sortBy
+          sortByValue: this.props.sortBy,
+          emphasisValue: this.props.emphasis
         })
       );
     }
@@ -26392,6 +26402,11 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
     key: 'changeSortBy',
     value: function changeSortBy(sortBy) {
       this.props.dispatch(ViewActions.changeSortBy(sortBy));
+    }
+  }, {
+    key: 'changeEmphasis',
+    value: function changeEmphasis(emphasis) {
+      this.props.dispatch(ViewActions.changeEmphasis(emphasis));
     }
   }]);
 
@@ -26639,6 +26654,40 @@ var TaskList = function (_React$Component) {
           _react2.default.createElement(
             'label',
             null,
+            'Emphasize:'
+          ),
+          _react2.default.createElement(
+            'select',
+            {
+              value: this.props.emphasisValue,
+              onChange: function onChange(e) {
+                _this2.props.changeEmphasis(e.target.value);
+              }
+            },
+            _react2.default.createElement(
+              'option',
+              { value: 'none' },
+              'None'
+            ),
+            _react2.default.createElement(
+              'option',
+              { value: 'time' },
+              'Time'
+            ),
+            _react2.default.createElement(
+              'option',
+              { value: 'effort' },
+              'Effort'
+            ),
+            _react2.default.createElement(
+              'option',
+              { value: 'focus' },
+              'Focus'
+            )
+          ),
+          _react2.default.createElement(
+            'label',
+            null,
             'Sort type:'
           ),
           _react2.default.createElement(
@@ -26704,21 +26753,45 @@ var TaskList = function (_React$Component) {
       var sum1 = task1.time + task1.effort + task1.focus;
       var sum2 = task2.time + task2.effort + task2.focus;
 
+      switch (this.props.emphasis) {
+        case 'time':
+          sum1 += task1.time;
+          sum2 += task2.time;
+          break;
+        case 'effort':
+          sum1 += task1.effort;
+          sum2 += task2.effort;
+          break;
+        case 'focus':
+          sum1 += task1.focus;
+          sum2 += task2.focus;
+          break;
+      }
+
       return sum1 - sum2;
     }
   }, {
     key: 'sortTime',
     value: function sortTime(task1, task2) {
+      if (this.props.emphasis === 'time') {
+        return task1.time * 2 - task2.time * 2;
+      }
       return task1.time - task2.time;
     }
   }, {
     key: 'sortEffort',
     value: function sortEffort(task1, task2) {
+      if (this.props.emphasis === 'effort') {
+        return task1.effort * 2 - task2.effort * 2;
+      }
       return task1.effort - task2.effort;
     }
   }, {
     key: 'sortFocus',
     value: function sortFocus(task1, task2) {
+      if (this.props.emphasis === 'focus') {
+        return task1.focus * 2 - task2.focus * 2;
+      }
       return task1.focus - task2.focus;
     }
   }]);
@@ -27799,10 +27872,18 @@ var changeSortBy = function changeSortBy(sortBy) {
   };
 };
 
+var changeEmphasis = function changeEmphasis(emphasis) {
+  return {
+    type: 'CHANGE_EMPHASIS',
+    data: { emphasis: emphasis }
+  };
+};
+
 module.exports.showTaskForm = showTaskForm;
 module.exports.hideTaskForm = hideTaskForm;
 module.exports.changeSortType = changeSortType;
 module.exports.changeSortBy = changeSortBy;
+module.exports.changeEmphasis = changeEmphasis;
 
 /***/ }),
 /* 246 */
