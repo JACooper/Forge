@@ -28,6 +28,12 @@ const TaskSchema = new mongoose.Schema({
     default: mongoose.Types.ObjectId
   },
 
+  user: {
+    type: mongoose.Schema.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+
   title: {
     type: String,
     trim: true,
@@ -114,18 +120,14 @@ const TaskSchema = new mongoose.Schema({
   //   type: String,
   //   required: true,
   //   default: 'active',
-  // }
-
-  // owner: {
-  //   type: mongoose.Schema.ObjectId,
-  //   required: true,
-  //   ref: 'User',
   // },-->
 });
 
-TaskSchema.statics.findTasks = (callback) => {
-  return TaskModel.find().select('title').exec(callback);
-}
+TaskSchema.statics.findTasks = (userID, callback) => {
+  return TaskModel.find({ user: mongoose.Types.ObjectId(userID) })
+                  .select('title')
+                  .exec(callback);
+};
 
 TaskModel = mongoose.model('Task', TaskSchema);
 

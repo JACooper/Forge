@@ -2,46 +2,56 @@ const models = require('../models');
 
 const User = models.User.UserModel;
 
-const signup = (_request, _response) => {
+const register = (_request, _response) => {
   const request = _request;
   const response = _response;
 
-  if (!request.body.username || !request.body.password || !request.body.passwordConfirm) {
+  if (!request.body.email || !request.body.password || !request.body.passwordConfirm) {
     return response.status(400).json({ error: 'Not all fields supplied' });
   }
 
-  const username = request.body.username.toString();
+  const email = request.body.email.toString();
   const password = request.body.password.toString();
   const passwordConfirm = request.body.passwordConfirm.toString();
+
+  // Duplicate basic validation on server side
+  // Keep in mind real validation requires actually sending an email (TODO. . .?)
+  if (!email.search(new RegExp(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/))) {
+    return response.status(400).json({ error: 'Invalid email address' });
+  }
 
   if (password !== passwordConfirm) {
     return response.status(400).json({ error: 'Passwords do not match' });
   }
 
-  // Create a new User with a username and whatever other fields are desired
-  const newUser = new User({ username });
+  // Create a new User with a email and whatever other fields are desired
+  const newUser = new User({ email });
 
   User.register(newUser, password, (error, user) => {
     if (error) {
-      return response.status(400).json({ error: 'Could not register user!' });
+      console.dir(error); // TODO: Go through passport source to determine all possible error msgs
+      return response.status(400).json({ error: 'An error occurred during registration' });
     }
+
+    // NOTE: Sending back sessionID is probably excessive, given it isn't actually used
+    //  for further requests
 
     // If we make it here, the user was registered successfully
     // They should now be stored in request.user
-    return response.json({ user: user.username });  // Temporary return to make ESLint happy
+    return response.json({ id: request.sessionID, user: user.email });
   });
 };
 
-const signin = (_request, _response) => {
+const login = (_request, _response) => {
   const request = _request;
   const response = _response;
 
   // Whatever render information we want goes here
   // Remember that the user is stored in request.user (from passport.authenticate)
-  return response.json({ user: request.user.username });  // Temporary return to make ESLint happy
+  return response.json({ id: request.sessionID, user: request.user.email });
 };
 
-const signout = (_request, _response) => {
+const logout = (_request, _response) => {
   const request = _request;
   const response = _response;
 
@@ -79,7 +89,7 @@ const changePassword = (_request, _response) => {
   });
 };
 
-module.exports.signup = signup;
-module.exports.signin = signin;
-module.exports.signout = signout;
+module.exports.register = register;
+module.exports.login = login;
+module.exports.logout = logout;
 module.exports.changePassword = changePassword;

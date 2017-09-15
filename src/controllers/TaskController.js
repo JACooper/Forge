@@ -9,23 +9,29 @@ const createTask = (_request, _response) => {
   const title = request.body.task.title;
 
   const taskData = {
+    user: request.user._id,
     title,
   };
 
   const newTask = new Task.TaskModel(taskData);
-  return newTask.save()
-          .then(() => response.status(200))
-          .catch((error) => {
-            return response.status(400).json({error: error});
-          });
+  return newTask
+    .save()
+    .then(() => {
+      response.status(200).json({});
+    })
+    .catch((error) => {
+      console.dir(error);
+      response.status(400).json({error: 'An error occurred creating the task'});
+    });
 };
 
 const getTasks = (_request, _response) => {
   const request = _request;
   const response = _response;
 
-  return Task.TaskModel.findTasks((error, tasks) => {
+  return Task.TaskModel.findTasks(request.user.id, (error, tasks) => {
     if (error) {
+      console.dir(error);
       return response.status(400).json({error: 'An error occurred retrieving tasks'});
     }
 

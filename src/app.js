@@ -69,7 +69,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: {
     httpOnly: true,           // Disallow JS access to cookies
-                              // TODO: look into maxAge & secure properties
+    // TODO: look into maxAge & secure properties
   },
 }));
 

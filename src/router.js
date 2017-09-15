@@ -10,12 +10,12 @@ const middleware = require('./middleware');
 const router = (app) => {
 
   // -- Auth routes --
-  app.post('/signup', controllers.User.signup);
-  app.post('/signin', middleware.validation.authorize, controllers.User.signin);
-  app.get('/signout', controllers.User.signout);
+  app.post('/register', controllers.User.register);
+  app.post('/login', middleware.validation.authorize, controllers.User.login);
+  app.get('/logout', controllers.User.logout);
   app.post('/changePassword',
-          middleware.passport.authenticate('local'),
-          controllers.User.changePassword);
+    middleware.passport.authenticate('local'),
+    controllers.User.changePassword);
   // changePassword authenticates for PoC testing purposes
   // middleware.validation.isAuth should be used once we have a persistent client
   
