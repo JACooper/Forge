@@ -22,11 +22,15 @@ npm start
 
 This will start the server listening for connections. To access the app, go to localhost:3000 on the webpage of your choice. To run with the Chrome debugger attached, run
 
-```npm run start-debug```
+```
+npm run start-debug
+```
 
 This will print a url you can use to access the debugger. While developing server features, it is recommended to run through nodemon to automatically restart when files are saved. To do so, run
 
-```npm run nodemon```
+```
+npm run nodemon
+```
 
 
 License
