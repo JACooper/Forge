@@ -40,34 +40,34 @@ const TaskSchema = new mongoose.Schema({
     required: true,
   },
 
-  // <!--description: {
+  // description: {
   //   type: String,
   //   trim: true,
   // },
 
-  // time: {
-  //   type: Number,
-  //   min: 0,
-  //   max: 3,
-  //   required: true,
-  //   default: 0,
-  // }
+  time: {
+    type: Number,
+    min: 1,
+    max: 3,
+    required: true,
+    default: 0,
+  },
 
-  // effort: {
-  //   type: Number,
-  //   min: 0,
-  //   max: 3,
-  //   required: true,
-  //   default: 0,
-  // }
+  effort: {
+    type: Number,
+    min: 1,
+    max: 3,
+    required: true,
+    default: 0,
+  },
 
-  // focus: {
-  //   type: Number,
-  //   min: 0,
-  //   max: 3,
-  //   required: true,
-  //   default: 0,
-  // }
+  focus: {
+    type: Number,
+    min: 1,
+    max: 3,
+    required: true,
+    default: 0,
+  },
 
   // startDate: {
   //   type: Date,
@@ -120,13 +120,13 @@ const TaskSchema = new mongoose.Schema({
   //   type: String,
   //   required: true,
   //   default: 'active',
-  // },-->
+  // },
 });
 
 TaskSchema.statics.findTasks = (userID, callback) => {
   return TaskModel.find({ user: mongoose.Types.ObjectId(userID) })
-                  .select('title')
-                  .exec(callback);
+    .select('title time effort focus')
+    .exec(callback);
 };
 
 TaskModel = mongoose.model('Task', TaskSchema);
