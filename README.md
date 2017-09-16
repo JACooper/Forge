@@ -13,7 +13,7 @@ The Forge server is built using Node, Express, Redis, and MongoDB, with Mongoose
 Running Locally
 ---------------
 
-Make sure you have [Node](https://nodejs.org) installed, and [Redis]() and [MongoDB]() installed and running. To start, navigate to the project directory and run
+Make sure you have [Node](https://nodejs.org) installed, and [Redis](https://redis.io/) and [MongoDB](https://www.mongodb.com/) installed and running. To start, navigate to the project directory and run
 
 ```
 npm install
