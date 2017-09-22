@@ -1,6 +1,7 @@
 const models = require('../models');
 
-const Task = models.Task;
+const Task = models.Task.TaskModel;
+const Category = models.Category.CategoryModel;
 
 const createTask = (_request, _response) => {
   const request = _request;
@@ -10,18 +11,22 @@ const createTask = (_request, _response) => {
   const time = request.body.task.time;
   const effort = request.body.task.effort;
   const focus = request.body.task.focus;
+  
+  const category = request.body.task.category;
 
-  const taskData = {
-    user: request.user._id,
-    title,
-    time,
-    effort,
-    focus,
-  };
-
-  const newTask = new Task.TaskModel(taskData);
-  return newTask
-    .save()
+  Category.find({user: request.user._id, name: category})
+    .exec()
+    .then((categories) => {
+      const taskData = {
+        category: categories[0]._id,
+        title,
+        time,
+        effort,
+        focus,
+      };
+      const newTask = new Task(taskData);
+      return newTask.save();
+    })
     .then(() => {
       response.status(200).json({});
     })
@@ -35,14 +40,34 @@ const getTasks = (_request, _response) => {
   const request = _request;
   const response = _response;
 
-  return Task.TaskModel.findTasks(request.user.id, (error, tasks) => {
-    if (error) {
+  Category
+    .find({ user: request.user._id })
+    .exec()
+    .then((categories) => {
+      return Promise.all(categories.map((category) => {
+        return category.id;
+      }));
+    })
+    .then((categoryIds) => {
+      return Promise.all(categoryIds.map((id) => {
+        return Task
+          .find({ category: id })
+          .populate('category')
+          .exec();
+      }));
+    })
+    .then((categorizedTasks) => {
+      let tasks = [];
+      categorizedTasks.forEach((cTasks) => {
+        tasks = tasks.concat(cTasks);
+      });
+
+      return response.status(200).json({ tasks });
+    })
+    .catch((error) => {
       console.dir(error);
       return response.status(400).json({error: 'An error occurred retrieving tasks'});
-    }
-
-    return response.json({tasks});
-  });
+    });
 };
 
 module.exports.createTask = createTask;
