@@ -5,33 +5,11 @@ mongoose.Promise = global.Promise;  // Use default promise library
 let TaskModel = {};
 
 const TaskSchema = new mongoose.Schema({
-  /*
-  Tasks need:
-    Name:
-      Friendly name
-    Description:
-      Description of task
-    CompletionTime:
-      How many hours/minutes this task is expected to take
-    LoggedTime:
-      How many hours/minutes have been logged against this task
-    Status:
-      Whether the task is active, complete, or abandoned
-    Owner/User:
-      The Account this task is tied to
-   */
 
-  id: {
+  category: {
     type: mongoose.Schema.ObjectId,
     required: true,
-    unique: true,
-    default: mongoose.Types.ObjectId
-  },
-
-  user: {
-    type: mongoose.Schema.ObjectId,
-    required: true,
-    ref: 'User',
+    ref: 'Category',
   },
 
   title: {
@@ -123,8 +101,8 @@ const TaskSchema = new mongoose.Schema({
   // },
 });
 
-TaskSchema.statics.findTasks = (userID, callback) => {
-  return TaskModel.find({ user: mongoose.Types.ObjectId(userID) })
+TaskSchema.statics.findTasks = (categoryID, callback) => {
+  return TaskModel.find({ category: mongoose.Types.ObjectId(categoryID) })
     .select('title time effort focus')
     .exec(callback);
 };

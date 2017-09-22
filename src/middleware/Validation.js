@@ -10,6 +10,7 @@ const authorize = (req, res, next) => {
       return res.status(401).json({ error: info.message });
     }
 
+    // If passport check succeeded, log the user in
     req.logIn(user, (error) => {
       if (error) {
         return next(error);

@@ -1,8 +1,9 @@
 const models = require('../models');
 
 const User = models.User.UserModel;
+const Category = models.Category.CategoryModel;
 
-const register = (_request, _response) => {
+const register = (_request, _response, next) => {
   const request = _request;
   const response = _response;
 
@@ -33,12 +34,21 @@ const register = (_request, _response) => {
       return response.status(400).json({ error: 'An error occurred during registration' });
     }
 
+    // Create an 'Uncategorized' category for users, by default
+    const categoryData = {
+      user: user._id,
+      name: 'Uncategorized',
+    };
+    // Need to handle/swallow error to prevent server crashing
+    new Category(categoryData).save();
+    
     // NOTE: Sending back sessionID is probably excessive, given it isn't actually used
     //  for further requests
 
     // If we make it here, the user was registered successfully
     // They should now be stored in request.user
-    return response.json({ id: request.sessionID, user: user.email });
+    // return response.json({ id: request.sessionID, user: user.email });
+    return next();
   });
 };
 
