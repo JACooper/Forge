@@ -25949,7 +25949,6 @@ var initialState = {
   addingCategory: false,
   addCategorySuccess: false,
   addCategoryError: null,
-  shouldGetCategories: true,
   gettingCategories: false,
   getCategoriesError: null
 };
@@ -25973,8 +25972,8 @@ function reduce() {
       });
     case 'ADD_CATEGORY_SUCCESS':
       return _extends({}, state, {
+        categories: state.categories.concat(action.data.category),
         addingCategory: false,
-        shouldGetCategories: true,
         addCategoryError: null,
         addCategorySuccess: true
       });
@@ -25987,7 +25986,6 @@ function reduce() {
 
     case 'GET_CATEGORIES_START':
       return _extends({}, state, {
-        shouldGetCategories: false,
         gettingCategories: true,
         getCategoriesError: null
       });
@@ -26026,7 +26024,6 @@ var initialState = {
   addingTask: false, // Display progress spinner, should stop after success/failure
   addTaskError: null, // Display error, should go away after success/new attempt (or X amount of time?)
   addTaskSuccess: false, // Display success message, close window
-  shouldGetTasks: true,
   gettingTasks: false, // Display progress spinner, should stop after success/failure
   getTasksError: null // Display error, should go away after success/new attempt (or X amount of time?)
 };
@@ -26044,8 +26041,8 @@ function reduce() {
       });
     case 'ADD_TASK_SUCCESS':
       return _extends({}, state, {
+        tasks: state.tasks.concat(action.data.task),
         addingTask: false,
-        shouldGetTasks: true,
         addTaskError: null,
         addTaskSuccess: true
       });
@@ -26058,7 +26055,6 @@ function reduce() {
 
     case 'GET_TASKS_START':
       return _extends({}, state, {
-        shouldGetTasks: false,
         gettingTasks: true,
         getTasksError: null
       });
@@ -26285,7 +26281,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var App = (_dec = (0, _reactRedux.connect)(function (store) {
   return {
     tasks: store.task.tasks,
-    shouldGetTasks: store.task.shouldGetTasks,
     addTaskSuccess: store.task.addTaskSuccess,
 
     showTaskForm: store.view.showTaskForm,
@@ -26294,8 +26289,7 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
     emphasis: store.view.emphasis,
 
     activeCategory: store.category.activeCategory,
-    categories: store.category.categories,
-    shouldGetCategories: store.category.shouldGetCategories
+    categories: store.category.categories
   };
 }), _dec(_class = function (_React$Component) {
   _inherits(App, _React$Component);
@@ -26357,7 +26351,6 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
             _react2.default.createElement(_CategoryList2.default, {
               activeCategory: this.props.activeCategory,
               categories: this.props.categories,
-              shouldUpdate: this.props.shouldGetCategories,
               setActiveCategory: this.setActiveCategory,
               addCategory: this.addCategory,
               getCategories: this.getCategories
@@ -26366,7 +26359,6 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
           _react2.default.createElement(_TaskList2.default, {
             tasks: this.props.tasks,
             updateTasks: this.getTasks,
-            shouldUpdate: this.props.shouldGetTasks,
             activeCategory: this.props.activeCategory,
             sortTypeValue: this.props.sortType,
             sortByValue: this.props.sortBy,
@@ -26620,13 +26612,6 @@ var TaskList = function (_React$Component) {
       this.props.updateTasks();
     }
   }, {
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(newProps) {
-      if (newProps.shouldUpdate && !(this.props.shouldUpdate == newProps.shouldUpdate)) {
-        this.props.updateTasks();
-      }
-    }
-  }, {
     key: 'render',
     value: function render() {
       var _this2 = this;
@@ -26846,13 +26831,6 @@ var CategoryList = function (_React$Component) {
       this.props.getCategories();
     }
   }, {
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(newProps) {
-      if (newProps.shouldUpdate && !(this.props.shouldUpdate == newProps.shouldUpdate)) {
-        this.props.getCategories();
-      }
-    }
-  }, {
     key: 'render',
     value: function render() {
       var _this2 = this;
@@ -26909,6 +26887,7 @@ var CategoryList = function (_React$Component) {
           type: 'text',
           placeholder: 'New category. . .',
           value: this.state.newCategoryName,
+          maxLength: '19',
           onChange: function onChange(e) {
             _this2.setState({ newCategoryName: e.target.value });
           },
@@ -28153,8 +28132,8 @@ var setActiveCategory = function setActiveCategory(category) {
 var addCategory = function addCategory(category) {
   return function (dispatch) {
     dispatch({ type: 'ADD_CATEGORY_START', data: null });
-    _superagent2.default.post('/category').send({ category: category }).then(function () {
-      dispatch({ type: 'ADD_CATEGORY_SUCCESS', data: null });
+    _superagent2.default.post('/category').send({ category: category }).then(function (response) {
+      dispatch({ type: 'ADD_CATEGORY_SUCCESS', data: { category: response.body.category } });
     }).catch(function (error) {
       dispatch({ type: 'ADD_CATEGORY_FAILURE', data: { error: error } });
     });
@@ -28203,8 +28182,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var addTask = function addTask(task) {
   return function (dispatch) {
     dispatch({ type: 'ADD_TASK_START', data: null });
-    _superagent2.default.post('/task').send({ task: task }).then(function () {
-      dispatch({ type: 'ADD_TASK_SUCCESS', data: null });
+    _superagent2.default.post('/task').send({ task: task }).then(function (response) {
+      dispatch({ type: 'ADD_TASK_SUCCESS', data: { task: response.body.task } });
     }).catch(function (error) {
       dispatch({ type: 'ADD_TASK_FAILURE', data: { error: error } });
     });
@@ -28459,7 +28438,7 @@ exports = module.exports = __webpack_require__(253)();
 
 
 // module
-exports.push([module.i, "* {\n  margin: 0;\n  padding: 0; }\n\nbody {\n  background-color: #ECECEC;\n  font-family: \"Montserrat\", sans-serif;\n  font-size: 13pt; }\n\n.overlay-dim {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.4);\n  z-index: 1; }\n\n.invisible-class {\n  display: none; }\n\n.form-input {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-bottom: 14px; }\n\n.main-view {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: start;\n      -ms-flex-align: start;\n          align-items: flex-start;\n  width: 850px;\n  margin: auto; }\n\n.sidebar {\n  width: 200px;\n  margin-right: 6px; }\n\n.task-controls-wrapper {\n  width: 200px; }\n\n.category-list-wrapper {\n  width: calc(200px - 15px);\n  margin-top: 10px;\n  padding-top: 10px;\n  border-top: 1px solid #808080; }\n\n.category-item {\n  margin: 2px; }\n  .category-item:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.active-category {\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 4px; }\n  .active-category:hover {\n    background-color: #808080;\n    cursor: default; }\n\n.task-list-wrapper {\n  width: 650px; }\n\n.task-list {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 100%; }\n\n.task-wrapper {\n  background-color: #FAFAFA;\n  width: 100%;\n  margin-bottom: 10px;\n  border-radius: 5px; }\n  .task-wrapper:hover {\n    background-color: #E0E0E0; }\n\n.task-title {\n  margin-top: 3px;\n  margin-left: 3px; }\n\n.task-time {\n  margin-left: 3px; }\n\n.task-effort {\n  margin-left: 3px; }\n\n.task-focus {\n  margin-left: 3px; }\n", ""]);
+exports.push([module.i, "* {\n  margin: 0;\n  padding: 0; }\n\nbody {\n  background-color: #ECECEC;\n  font-family: \"Montserrat\", sans-serif;\n  font-size: 13pt; }\n\n.overlay-dim {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.4);\n  z-index: 1; }\n\n.invisible-class {\n  display: none; }\n\n.form-input {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-bottom: 14px; }\n\n.main-view {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: start;\n      -ms-flex-align: start;\n          align-items: flex-start;\n  width: 850px;\n  margin: auto; }\n\n.sidebar {\n  width: 200px;\n  margin-right: 6px; }\n\n.task-controls-wrapper {\n  width: 200px; }\n\n.category-list-wrapper {\n  width: calc(200px - 15px);\n  margin-top: 10px;\n  padding-top: 10px;\n  border-top: 1px solid #808080; }\n\n.category-item {\n  margin: 2px;\n  border-radius: 4px; }\n  .category-item:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.active-category {\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 4px; }\n  .active-category:hover {\n    background-color: #808080;\n    cursor: default; }\n\n.task-list-wrapper {\n  width: 650px; }\n\n.task-list {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 100%; }\n\n.task-wrapper {\n  background-color: #FAFAFA;\n  width: 100%;\n  margin-bottom: 10px;\n  border-radius: 5px; }\n  .task-wrapper:hover {\n    background-color: #E0E0E0; }\n\n.task-title {\n  margin-top: 3px;\n  margin-left: 3px; }\n\n.task-time {\n  margin-left: 3px; }\n\n.task-effort {\n  margin-left: 3px; }\n\n.task-focus {\n  margin-left: 3px; }\n", ""]);
 
 // exports
 

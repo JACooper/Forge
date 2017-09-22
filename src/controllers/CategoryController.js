@@ -19,8 +19,8 @@ const createCategory = (_request, _response) => {
   const newCategory = new Category(categoryData);
   return newCategory
     .save()
-    .then(() => {
-      response.status(200).json({});
+    .then((newCategory) => {
+      response.status(200).json({category: newCategory});
     })
     .catch((error) => {
       console.dir(error);
