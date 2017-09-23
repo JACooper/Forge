@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;  // Use default promise library
 
-const Task = require('./TaskModel.js');
-
 let CategoryModel = {};
 const CategorySchema = new mongoose.Schema({
 

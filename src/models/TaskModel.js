@@ -109,13 +109,14 @@ const TaskSchema = new mongoose.Schema({
 
 TaskSchema.statics.findTasksByUser = (userID, callback) => {
   return TaskModel.find({ user: mongoose.Types.ObjectId(userID) })
-    .select('title time effort focus complete')
+    .select('category title time effort focus complete')
+    .populate('category')
     .exec(callback);
 };
 
 TaskSchema.statics.findTasksByCategory = (categoryID, callback) => {
   return TaskModel.find({ category: mongoose.Types.ObjectId(categoryID) })
-    .select('category title time effort focus complete')
+    .select('title time effort focus complete')
     .exec(callback);
 };
 
