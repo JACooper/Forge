@@ -6,6 +6,12 @@ let TaskModel = {};
 
 const TaskSchema = new mongoose.Schema({
 
+  user: {
+    type: mongoose.Schema.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+
   category: {
     type: mongoose.Schema.ObjectId,
     required: true,
@@ -46,6 +52,11 @@ const TaskSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
+
+  complete: {
+    type: Boolean,
+    default: false,
+  }
 
   // startDate: {
   //   type: Date,
@@ -89,11 +100,6 @@ const TaskSchema = new mongoose.Schema({
   //   type: Date,
   // }
 
-  // category: {
-  //   type: String,
-  //   trim: true,
-  // }
-
   // status: {
   //   type: String,
   //   required: true,
@@ -101,9 +107,15 @@ const TaskSchema = new mongoose.Schema({
   // },
 });
 
-TaskSchema.statics.findTasks = (categoryID, callback) => {
+TaskSchema.statics.findTasksByUser = (userID, callback) => {
+  return TaskModel.find({ user: mongoose.Types.ObjectId(userID) })
+    .select('title time effort focus complete')
+    .exec(callback);
+};
+
+TaskSchema.statics.findTasksByCategory = (categoryID, callback) => {
   return TaskModel.find({ category: mongoose.Types.ObjectId(categoryID) })
-    .select('title time effort focus')
+    .select('category title time effort focus complete')
     .exec(callback);
 };
 

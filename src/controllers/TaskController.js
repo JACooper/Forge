@@ -12,13 +12,14 @@ const createTask = (_request, _response) => {
   const effort = request.body.task.effort;
   const focus = request.body.task.focus;
   
-  const category = request.body.task.category;
+  const category = request.body.task.categoryID;
 
-  Category.find({user: request.user._id, name: category})
+  Category.findById(category)
     .exec()
-    .then((categories) => {
+    .then((category) => {
       const taskData = {
-        category: categories[0]._id,
+        user: request.user._id,
+        category,
         title,
         time,
         effort,
@@ -40,33 +41,35 @@ const getTasks = (_request, _response) => {
   const request = _request;
   const response = _response;
 
-  Category.find({ user: request.user._id })
-    .exec()
-    .then((categories) => {
-      return Promise.all(categories.map((category) => {
-        return category.id;
-      }));
-    })
-    .then((categoryIds) => {
-      return Promise.all(categoryIds.map((id) => {
-        return Task.find({ category: id })
-          .populate('category')
-          .exec();
-      }));
-    })
-    .then((categorizedTasks) => {
-      let tasks = [];
-      categorizedTasks.forEach((cTasks) => {
-        tasks = tasks.concat(cTasks);
-      });
+  return Task.findTasksByUser(request.user._id, (error, tasks) => {
+    if (error) {
+      console.dir(error);
+      return response.status(400).json({error: 'An error occurred retrieving tasks'});
+    }
 
-      return response.status(200).json({ tasks });
+    return response.json({tasks});
+  });
+};
+
+const markComplete = (_request, _response) => {
+  const request = _request;
+  const response = _response;
+
+  return Task.findOne({ user: request.user._id, _id: request.body.id })
+    .exec()
+    .then((task) => {
+      task.complete = true;
+      return task.save();
+    })
+    .then((updatedTask) => {
+      return response.status(200).json({task: updatedTask});
     })
     .catch((error) => {
       console.dir(error);
-      return response.status(400).json({error: 'An error occurred retrieving tasks'});
+      return response.status(400).json({error: 'An error occurred completing the task'});
     });
 };
 
 module.exports.createTask = createTask;
 module.exports.getTasks = getTasks;
+module.exports.markComplete = markComplete;
