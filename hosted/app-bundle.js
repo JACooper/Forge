@@ -26025,7 +26025,9 @@ var initialState = {
   addTaskError: null, // Display error, should go away after success/new attempt (or X amount of time?)
   addTaskSuccess: false, // Display success message, close window
   gettingTasks: false, // Display progress spinner, should stop after success/failure
-  getTasksError: null // Display error, should go away after success/new attempt (or X amount of time?)
+  getTasksError: null, // Display error, should go away after success/new attempt (or X amount of time?)
+  togglingComplete: false,
+  toggleCompleteError: null
 };
 
 function reduce() {
@@ -26069,6 +26071,30 @@ function reduce() {
         gettingTasks: false,
         getTasksError: action.data.error
       });
+
+    case 'TOGGLE_COMPLETE_START':
+      return _extends({}, state, {
+        togglingComplete: true,
+        toggleCompleteError: null
+      });
+    case 'TOGGLE_COMPLETE_SUCCESS':
+      {
+        var updatedTasks = state.tasks.filter(function (task) {
+          return task._id !== action.data.task._id;
+        });
+        updatedTasks.push(action.data.task);
+
+        return _extends({}, state, {
+          tasks: updatedTasks,
+          togglingComplete: false,
+          toggleCompleteError: null
+        });
+      }
+    case 'TOGGLE_COMPLETE_FAILURE':
+      return _extends({}, state, {
+        togglingComplete: false,
+        toggleCompleteError: action.data.error
+      });
   }
 
   return state;
@@ -26090,6 +26116,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 exports.default = reduce;
 var initialState = {
   showTaskForm: false,
+  showComplete: false,
   sortType: 'ascending',
   sortBy: 'sum',
   emphasis: 'none'
@@ -26125,6 +26152,11 @@ function reduce() {
     case 'CHANGE_EMPHASIS':
       return _extends({}, state, {
         emphasis: action.data.emphasis
+      });
+
+    case 'TOGGLE_SHOW_COMPLETE':
+      return _extends({}, state, {
+        showComplete: !state.showComplete
       });
   }
 
@@ -26284,6 +26316,7 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
     addTaskSuccess: store.task.addTaskSuccess,
 
     showTaskForm: store.view.showTaskForm,
+    showComplete: store.view.showComplete,
     sortType: store.view.sortType,
     sortBy: store.view.sortBy,
     emphasis: store.view.emphasis,
@@ -26301,8 +26334,10 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
 
     _this.showTaskForm = _this.showTaskForm.bind(_this);
     _this.hideTaskForm = _this.hideTaskForm.bind(_this);
+    _this.toggleShowComplete = _this.toggleShowComplete.bind(_this);
     _this.submitTask = _this.submitTask.bind(_this);
     _this.getTasks = _this.getTasks.bind(_this);
+    _this.toggleComplete = _this.toggleComplete.bind(_this);
     _this.logout = _this.logout.bind(_this);
 
     _this.setActiveCategory = _this.setActiveCategory.bind(_this);
@@ -26343,7 +26378,9 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
             'div',
             { className: 'sidebar' },
             _react2.default.createElement(_TaskControls2.default, {
+              showComplete: this.props.showComplete,
               showTaskForm: this.showTaskForm,
+              toggleShowComplete: this.toggleShowComplete,
               changeSortType: this.changeSortType,
               changeSortBy: this.changeSortBy,
               changeEmphasis: this.changeEmphasis
@@ -26358,11 +26395,13 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
           ),
           _react2.default.createElement(_TaskList2.default, {
             tasks: this.props.tasks,
-            updateTasks: this.getTasks,
+            showComplete: this.props.showComplete,
             activeCategory: this.props.activeCategory,
             sortTypeValue: this.props.sortType,
             sortByValue: this.props.sortBy,
-            emphasisValue: this.props.emphasis
+            emphasisValue: this.props.emphasis,
+            updateTasks: this.getTasks,
+            toggleComplete: this.toggleComplete
           })
         )
       );
@@ -26383,6 +26422,11 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
       this.props.dispatch(ViewActions.hideTaskForm());
     }
   }, {
+    key: 'toggleShowComplete',
+    value: function toggleShowComplete() {
+      this.props.dispatch(ViewActions.toggleShowComplete());
+    }
+  }, {
     key: 'setActiveCategory',
     value: function setActiveCategory(category) {
       this.props.dispatch(CategoryActions.setActiveCategory(category));
@@ -26400,13 +26444,24 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
   }, {
     key: 'submitTask',
     value: function submitTask(taskParams) {
-      var category = this.props.activeCategory ? this.props.activeCategory : 'Uncategorized';
-      this.props.dispatch(TaskActions.addTask(_extends({}, taskParams, { category: category })));
+      var _this2 = this;
+
+      var category = this.props.activeCategory ? this.props.categories.find(function (category) {
+        return category.name = _this2.props.activeCategory;
+      }) : this.props.categories.find(function (category) {
+        return category.name = 'Uncategorized';
+      });
+      this.props.dispatch(TaskActions.addTask(_extends({}, taskParams, { categoryID: category._id })));
     }
   }, {
     key: 'getTasks',
     value: function getTasks() {
       this.props.dispatch(TaskActions.getTasks());
+    }
+  }, {
+    key: 'toggleComplete',
+    value: function toggleComplete(taskID) {
+      this.props.dispatch(TaskActions.toggleComplete(taskID));
     }
   }, {
     key: 'changeSortType',
@@ -26621,6 +26676,12 @@ var TaskList = function (_React$Component) {
         return task.category.name === _this2.props.activeCategory;
       }) : this.props.tasks;
 
+      if (!this.props.showComplete) {
+        sortedTasks = sortedTasks.filter(function (task) {
+          return !task.complete;
+        });
+      }
+
       switch (this.props.sortByValue) {
         case 'sum':
           sortedTasks.sort(this.sortSum);
@@ -26647,7 +26708,7 @@ var TaskList = function (_React$Component) {
       }
 
       var tasks = sortedTasks.map(function (task) {
-        return _react2.default.createElement(_Task2.default, _extends({}, task, { key: task._id }));
+        return _react2.default.createElement(_Task2.default, _extends({}, task, { key: task._id, toggleComplete: _this2.props.toggleComplete }));
       });
 
       return _react2.default.createElement(
@@ -26751,6 +26812,10 @@ var Task = function (_React$Component) {
   _createClass(Task, [{
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
+      var toggleButtonClass = this.props.complete ? 'mark-uncomplete-button' : 'mark-complete-button';
+
       return _react2.default.createElement(
         'div',
         { className: 'task-wrapper' },
@@ -26773,7 +26838,14 @@ var Task = function (_React$Component) {
           'p',
           { className: 'task-focus' },
           this.props.focus
-        )
+        ),
+        _react2.default.createElement('button', {
+          type: 'button',
+          className: toggleButtonClass,
+          onClick: function onClick() {
+            _this2.props.toggleComplete(_this2.props._id, _this2.props.complete);
+          }
+        })
       );
     }
   }]);
@@ -26959,6 +27031,8 @@ var TaskControls = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
+      var completeViewText = this.props.showComplete ? 'Hide complete' : 'Show complete';
+
       return _react2.default.createElement(
         'div',
         { className: 'task-controls-wrapper' },
@@ -27057,7 +27131,8 @@ var TaskControls = function (_React$Component) {
               { value: 'focus' },
               'Focus'
             )
-          )
+          ),
+          _react2.default.createElement('input', { type: 'button', value: completeViewText, onClick: this.props.toggleShowComplete })
         )
       );
     }
@@ -28171,7 +28246,7 @@ exports.getCategories = getCategories;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTasks = exports.addTask = undefined;
+exports.toggleComplete = exports.getTasks = exports.addTask = undefined;
 
 var _superagent = __webpack_require__(56);
 
@@ -28203,8 +28278,20 @@ var getTasks = function getTasks() {
   };
 };
 
+var toggleComplete = function toggleComplete(taskID) {
+  return function (dispatch) {
+    dispatch({ type: 'TOGGLE_COMPLETE_START', data: null });
+    _superagent2.default.post('/complete').send({ id: taskID }).then(function (response) {
+      dispatch({ type: 'TOGGLE_COMPLETE_SUCCESS', data: { task: response.body.task } });
+    }).catch(function (error) {
+      dispatch({ type: 'TOGGLE_COMPLETE_FAILURE', data: { error: error } });
+    });
+  };
+};
+
 exports.addTask = addTask;
 exports.getTasks = getTasks;
+exports.toggleComplete = toggleComplete;
 
 /***/ }),
 /* 249 */
@@ -28226,6 +28313,13 @@ var showTaskForm = function showTaskForm() {
 var hideTaskForm = function hideTaskForm() {
   return {
     type: 'HIDE_TASK_FORM',
+    data: null
+  };
+};
+
+var toggleShowComplete = function toggleShowComplete() {
+  return {
+    type: 'TOGGLE_SHOW_COMPLETE',
     data: null
   };
 };
@@ -28253,6 +28347,7 @@ var changeEmphasis = function changeEmphasis(emphasis) {
 
 exports.showTaskForm = showTaskForm;
 exports.hideTaskForm = hideTaskForm;
+exports.toggleShowComplete = toggleShowComplete;
 exports.changeSortType = changeSortType;
 exports.changeSortBy = changeSortBy;
 exports.changeEmphasis = changeEmphasis;
@@ -28438,7 +28533,7 @@ exports = module.exports = __webpack_require__(253)();
 
 
 // module
-exports.push([module.i, "* {\n  margin: 0;\n  padding: 0; }\n\nbody {\n  background-color: #ECECEC;\n  font-family: \"Montserrat\", sans-serif;\n  font-size: 13pt; }\n\n.overlay-dim {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.4);\n  z-index: 1; }\n\n.invisible-class {\n  display: none; }\n\n.form-input {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-bottom: 14px; }\n\n.main-view {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: start;\n      -ms-flex-align: start;\n          align-items: flex-start;\n  width: 850px;\n  margin: auto; }\n\n.sidebar {\n  width: 200px;\n  margin-right: 6px; }\n\n.task-controls-wrapper {\n  width: 200px; }\n\n.category-list-wrapper {\n  width: calc(200px - 15px);\n  margin-top: 10px;\n  padding-top: 10px;\n  border-top: 1px solid #808080; }\n\n.category-item {\n  margin: 2px;\n  border-radius: 4px; }\n  .category-item:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.active-category {\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 4px; }\n  .active-category:hover {\n    background-color: #808080;\n    cursor: default; }\n\n.task-list-wrapper {\n  width: 650px; }\n\n.task-list {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 100%; }\n\n.task-wrapper {\n  background-color: #FAFAFA;\n  width: 100%;\n  margin-bottom: 10px;\n  border-radius: 5px; }\n  .task-wrapper:hover {\n    background-color: #E0E0E0; }\n\n.task-title {\n  margin-top: 3px;\n  margin-left: 3px; }\n\n.task-time {\n  margin-left: 3px; }\n\n.task-effort {\n  margin-left: 3px; }\n\n.task-focus {\n  margin-left: 3px; }\n", ""]);
+exports.push([module.i, "* {\n  margin: 0;\n  padding: 0; }\n\nbody {\n  background-color: #ECECEC;\n  font-family: \"Montserrat\", sans-serif;\n  font-size: 13pt; }\n\n.overlay-dim {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.4);\n  z-index: 1; }\n\n.invisible-class {\n  display: none; }\n\n.form-input {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-bottom: 14px; }\n\n.main-view {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: start;\n      -ms-flex-align: start;\n          align-items: flex-start;\n  width: 850px;\n  margin: auto; }\n\n.sidebar {\n  width: 200px;\n  margin-right: 6px; }\n\n.task-controls-wrapper {\n  width: 200px; }\n\n.category-list-wrapper {\n  width: calc(200px - 15px);\n  margin-top: 10px;\n  padding-top: 10px;\n  border-top: 1px solid #808080; }\n\n.category-item {\n  margin: 2px;\n  border-radius: 4px; }\n  .category-item:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.active-category {\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 4px; }\n  .active-category:hover {\n    background-color: #808080;\n    cursor: default; }\n\n.task-list-wrapper {\n  width: 650px; }\n\n.task-list {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 100%; }\n\n.task-wrapper {\n  background-color: #FAFAFA;\n  width: 100%;\n  margin-bottom: 10px;\n  border-radius: 5px; }\n  .task-wrapper:hover {\n    background-color: #E0E0E0; }\n\n.task-title {\n  margin-top: 3px;\n  margin-left: 3px; }\n\n.task-time {\n  margin-left: 3px; }\n\n.task-effort {\n  margin-left: 3px; }\n\n.task-focus {\n  margin-left: 3px; }\n\n.mark-complete-button {\n  width: 20px;\n  height: 10px;\n  float: right; }\n\n.mark-uncomplete-button {\n  width: 20px;\n  height: 10px; }\n", ""]);
 
 // exports
 
