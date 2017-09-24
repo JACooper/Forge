@@ -1,7 +1,6 @@
 const models = require('../models');
 
 const Task = models.Task.TaskModel;
-const Category = models.Category.CategoryModel;
 
 const createTask = (_request, _response) => {
   const request = _request;
@@ -11,24 +10,25 @@ const createTask = (_request, _response) => {
   const time = request.body.task.time;
   const effort = request.body.task.effort;
   const focus = request.body.task.focus;
+  const category = request.body.task.categoryID;
   
-  const category = request.body.task.category;
-
-  Category.find({user: request.user._id, name: category})
-    .exec()
-    .then((categories) => {
-      const taskData = {
-        category: categories[0]._id,
-        title,
-        time,
-        effort,
-        focus,
-      };
-      const newTask = new Task(taskData);
-      return newTask.save();
-    })
+  const taskData = {
+    user: request.user._id,
+    category,
+    title,
+    time,
+    effort,
+    focus,
+  };
+  const newTask = new Task(taskData);
+  return newTask.save()
     .then((savedTask) => {
-      response.status(200).json({task: savedTask});
+      Task.findById(savedTask._id)
+        .populate('category')
+        .exec()
+        .then((task) => {
+          response.status(200).json({task});
+        });
     })
     .catch((error) => {
       console.dir(error);
@@ -36,37 +36,74 @@ const createTask = (_request, _response) => {
     });
 };
 
+// const createTask = (_request, _response) => {
+//   const request = _request;
+//   const response = _response;
+
+//   const title = request.body.task.title;
+//   const time = request.body.task.time;
+//   const effort = request.body.task.effort;
+//   const focus = request.body.task.focus;
+  
+//   const category = request.body.task.categoryID;
+
+//   Category.findById(category)
+//     .exec()
+//     .then((category) => {
+//       const taskData = {
+//         user: request.user._id,
+//         category,
+//         title,
+//         time,
+//         effort,
+//         focus,
+//       };
+//       const newTask = new Task(taskData);
+//       return newTask.save();
+//     })
+//     .then((savedTask) => {
+//       response.status(200).json({task: savedTask});
+//     })
+//     .catch((error) => {
+//       console.dir(error);
+//       response.status(400).json({error: 'An error occurred creating the task'});
+//     });
+// };
+
 const getTasks = (_request, _response) => {
   const request = _request;
   const response = _response;
 
-  Category.find({ user: request.user._id })
-    .exec()
-    .then((categories) => {
-      return Promise.all(categories.map((category) => {
-        return category.id;
-      }));
-    })
-    .then((categoryIds) => {
-      return Promise.all(categoryIds.map((id) => {
-        return Task.find({ category: id })
-          .populate('category')
-          .exec();
-      }));
-    })
-    .then((categorizedTasks) => {
-      let tasks = [];
-      categorizedTasks.forEach((cTasks) => {
-        tasks = tasks.concat(cTasks);
-      });
+  return Task.findTasksByUser(request.user._id, (error, tasks) => {
+    if (error) {
+      console.dir(error);
+      return response.status(400).json({error: 'An error occurred retrieving tasks'});
+    }
 
-      return response.status(200).json({ tasks });
+    return response.json({tasks});
+  });
+};
+
+const toggleComplete = (_request, _response) => {
+  const request = _request;
+  const response = _response;
+
+  return Task.findOne({ user: request.user._id, _id: request.body.id })
+    .populate('category')
+    .exec()
+    .then((task) => {
+      task.complete = !task.complete;
+      return task.save();
+    })
+    .then((updatedTask) => {
+      return response.status(200).json({task: updatedTask});
     })
     .catch((error) => {
       console.dir(error);
-      return response.status(400).json({error: 'An error occurred retrieving tasks'});
+      return response.status(400).json({error: 'An error occurred completing the task'});
     });
 };
 
 module.exports.createTask = createTask;
 module.exports.getTasks = getTasks;
+module.exports.toggleComplete = toggleComplete;
