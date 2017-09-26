@@ -70,6 +70,25 @@ const toggleComplete = (_request, _response) => {
     });
 };
 
+const changeCategory = (_request, _response) => {
+  const request = _request;
+  const response = _response;
+
+  const search = { user: request.user._id, _id: request.body.taskID };
+  const update = { category: request.body.categoryID }; // Mongoose will automatically send as $set
+  return Task.findOneAndUpdate(search, update, { new: true })
+    .populate('category')
+    .exec()
+    .then((updatedTask) => {
+      return response.status(200).json({task: updatedTask});
+    })
+    .catch((error) => {
+      console.dir(error);
+      return response.status(400).json({error: 'An error occurred changing the task category'});
+    });
+};
+
 module.exports.createTask = createTask;
 module.exports.getTasks = getTasks;
 module.exports.toggleComplete = toggleComplete;
+module.exports.changeCategory = changeCategory;
