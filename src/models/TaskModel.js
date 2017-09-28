@@ -56,15 +56,15 @@ const TaskSchema = new mongoose.Schema({
   complete: {
     type: Boolean,
     default: false,
+  },
+
+  startDate: {
+    type: Date,
+  },
+
+  dueDate: {
+    type: Date,
   }
-
-  // startDate: {
-  //   type: Date,
-  // }
-
-  // dueDate: {
-  //   type: Date,
-  // }
 
   // reminder: {
   //   type: Boolean,
@@ -109,14 +109,14 @@ const TaskSchema = new mongoose.Schema({
 
 TaskSchema.statics.findTasksByUser = (userID, callback) => {
   return TaskModel.find({ user: mongoose.Types.ObjectId(userID) })
-    .select('category title time effort focus complete')
+    .select('category title time effort focus complete startDate dueDate')
     .populate('category')
     .exec(callback);
 };
 
 TaskSchema.statics.findTasksByCategory = (categoryID, callback) => {
   return TaskModel.find({ category: mongoose.Types.ObjectId(categoryID) })
-    .select('title time effort focus complete')
+    .select('title time effort focus complete startDate dueDate')
     .exec(callback);
 };
 

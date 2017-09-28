@@ -6,11 +6,11 @@ const createTask = (_request, _response) => {
   const request = _request;
   const response = _response;
 
-  const title = request.body.task.title;
+  const title = request.body.task.title.toString();
   const time = request.body.task.time;
   const effort = request.body.task.effort;
   const focus = request.body.task.focus;
-  const category = request.body.task.categoryID;
+  const category = request.body.task.categoryID.toString();
   
   const taskData = {
     user: request.user._id,
@@ -20,6 +20,32 @@ const createTask = (_request, _response) => {
     effort,
     focus,
   };
+
+  if (request.body.task.startDate) {
+    const startDate = Date.parse(request.body.task.startDate.toString());
+    
+    if (!isNaN(startDate)) {
+      taskData.startDate = new Date(startDate);
+    } else {
+      return response.status(400).json({ error: 'Invalid start date supplied' });
+    }
+  }
+
+  if (request.body.task.dueDate) {
+    const dueDate = Date.parse(request.body.task.dueDate.toString());
+    
+    if (!isNaN(dueDate)) {
+      taskData.dueDate = new Date(dueDate);
+    } else {
+      return response.status(400).json({ error: 'Invalid due date supplied' });
+    }
+  }
+
+  if (taskData.startDate !== undefined && taskData.dueDate !== undefined
+      && taskData.startDate.getTime() > taskData.dueDate.getTime()) {
+    return response.status(400).json({ error: 'Start date cannot be after than due date' });
+  }
+
   const newTask = new Task(taskData);
   return newTask.save()
     .then((savedTask) => {
@@ -32,7 +58,7 @@ const createTask = (_request, _response) => {
     })
     .catch((error) => {
       console.dir(error);
-      response.status(400).json({error: 'An error occurred creating the task'});
+      response.status(500).json({error: 'An error occurred creating the task'});
     });
 };
 
@@ -43,7 +69,7 @@ const getTasks = (_request, _response) => {
   return Task.findTasksByUser(request.user._id, (error, tasks) => {
     if (error) {
       console.dir(error);
-      return response.status(400).json({error: 'An error occurred retrieving tasks'});
+      return response.status(500).json({error: 'An error occurred retrieving tasks'});
     }
 
     return response.json({tasks});
@@ -66,7 +92,7 @@ const toggleComplete = (_request, _response) => {
     })
     .catch((error) => {
       console.dir(error);
-      return response.status(400).json({error: 'An error occurred completing the task'});
+      return response.status(500).json({error: 'An error occurred completing the task'});
     });
 };
 
@@ -84,7 +110,7 @@ const changeCategory = (_request, _response) => {
     })
     .catch((error) => {
       console.dir(error);
-      return response.status(400).json({error: 'An error occurred changing the task category'});
+      return response.status(500).json({error: 'An error occurred changing the task category'});
     });
 };
 

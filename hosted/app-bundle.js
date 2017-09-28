@@ -26404,7 +26404,7 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
         })) : null;
       }
 
-      var lightbox = this.props.detailView ? _react2.default.createElement('div', { className: 'lightbox-dim' }) : null;
+      var lightbox = this.props.detailView || this.props.showTaskForm ? _react2.default.createElement('div', { className: 'lightbox-dim' }) : null;
 
       var taskForm = this.props.showTaskForm ? _react2.default.createElement(_TaskForm2.default, { submit: this.submitTask, cancel: this.hideTaskForm }) : null;
 
@@ -26586,6 +26586,44 @@ var TaskDetail = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
+      var time = '';
+      var effort = '';
+      var focus = '';
+
+      for (var stars = 1; stars <= 3; stars++) {
+        if (stars <= this.props.time) {
+          time += '\u2605';
+        } else {
+          time += '\u2606';
+        }
+
+        if (stars <= this.props.effort) {
+          effort += '\u2605';
+        } else {
+          effort += '\u2606';
+        }
+
+        if (stars <= this.props.focus) {
+          focus += '\u2605';
+        } else {
+          focus += '\u2606';
+        }
+      }
+
+      var startDate = this.props.startDate ? _react2.default.createElement(
+        'p',
+        { className: 'task-detail-start' },
+        'Start Date: ',
+        this.props.startDate.toDateString()
+      ) : null;
+
+      var dueDate = this.props.dueDate ? _react2.default.createElement(
+        'p',
+        { className: 'task-detail-due' },
+        'Due Date: ',
+        this.props.dueDate.toDateString()
+      ) : null;
+
       var categoryOptions = this.props.categories.map(function (category) {
         return _react2.default.createElement(
           'option',
@@ -26607,18 +26645,23 @@ var TaskDetail = function (_React$Component) {
         _react2.default.createElement(
           'p',
           { className: 'task-detail-time' },
-          this.props.time
+          'Time: ',
+          time
         ),
         _react2.default.createElement(
           'p',
           { className: 'task-detail-effort' },
-          this.props.effort
+          'Effort: ',
+          effort
         ),
         _react2.default.createElement(
           'p',
           { className: 'task-detail-focus' },
-          this.props.focus
+          'Focus: ',
+          focus
         ),
+        startDate,
+        dueDate,
         _react2.default.createElement(
           'select',
           {
@@ -26677,6 +26720,10 @@ var _react = __webpack_require__(8);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _DateInput = __webpack_require__(256);
+
+var _DateInput2 = _interopRequireDefault(_DateInput);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -26699,7 +26746,9 @@ var TaskForm = function (_React$Component) {
       title: '',
       time: 1,
       effort: 1,
-      focus: 1
+      focus: 1,
+      startDate: null,
+      dueDate: null
     };
     return _this;
   }
@@ -26766,6 +26815,26 @@ var TaskForm = function (_React$Component) {
             _this2.setState({ focus: e.target.value });
           }
         }),
+        _react2.default.createElement(
+          'label',
+          { id: 'start-date-label' },
+          'Start Date (optional):'
+        ),
+        _react2.default.createElement(_DateInput2.default, {
+          date: this.state.startDate,
+          submit: function submit(startDate) {
+            _this2.setState({ startDate: startDate });
+          } }),
+        _react2.default.createElement(
+          'label',
+          { id: 'due-date-label' },
+          'Due Date (optional):'
+        ),
+        _react2.default.createElement(_DateInput2.default, {
+          date: this.state.dueDate,
+          submit: function submit(dueDate) {
+            _this2.setState({ dueDate: dueDate });
+          } }),
         _react2.default.createElement('input', { type: 'button', value: 'Submit task', onClick: this.submit }),
         _react2.default.createElement('input', { type: 'button', value: 'Cancel', onClick: this.props.cancel })
       );
@@ -26779,6 +26848,14 @@ var TaskForm = function (_React$Component) {
         effort: this.state.effort,
         focus: this.state.focus
       };
+
+      if (this.state.startDate !== null) {
+        task.startDate = this.state.startDate;
+      }
+
+      if (this.state.dueDate !== null) {
+        task.dueDate = this.state.dueDate;
+      }
 
       if (task.title && task.time && task.effort && task.focus) {
         this.props.submit(task);
@@ -26994,6 +27071,44 @@ var Task = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
+      var time = '';
+      var effort = '';
+      var focus = '';
+
+      for (var stars = 1; stars <= 3; stars++) {
+        if (stars <= this.props.time) {
+          time += '\u2605';
+        } else {
+          time += '\u2606';
+        }
+
+        if (stars <= this.props.effort) {
+          effort += '\u2605';
+        } else {
+          effort += '\u2606';
+        }
+
+        if (stars <= this.props.focus) {
+          focus += '\u2605';
+        } else {
+          focus += '\u2606';
+        }
+      }
+
+      var startDate = this.props.startDate ? _react2.default.createElement(
+        'p',
+        { className: 'task-start' },
+        'Start Date: ',
+        this.props.startDate.toDateString()
+      ) : null;
+
+      var dueDate = this.props.dueDate ? _react2.default.createElement(
+        'p',
+        { className: 'task-due' },
+        'Due Date: ',
+        this.props.dueDate.toDateString()
+      ) : null;
+
       return _react2.default.createElement(
         'div',
         { className: 'task-wrapper', onClick: function onClick() {
@@ -27007,18 +27122,23 @@ var Task = function (_React$Component) {
         _react2.default.createElement(
           'p',
           { className: 'task-time' },
-          this.props.time
+          'Time: ',
+          time
         ),
         _react2.default.createElement(
           'p',
           { className: 'task-effort' },
-          this.props.effort
+          'Effort: ',
+          effort
         ),
         _react2.default.createElement(
           'p',
           { className: 'task-focus' },
-          this.props.focus
-        )
+          'Focus: ',
+          focus
+        ),
+        startDate,
+        dueDate
       );
     }
   }]);
@@ -27090,6 +27210,7 @@ var CategoryList = function (_React$Component) {
             category.name
           );
         }
+
         return _react2.default.createElement(
           'p',
           {
@@ -27305,7 +27426,11 @@ var TaskControls = function (_React$Component) {
               'Focus'
             )
           ),
-          _react2.default.createElement('input', { type: 'button', value: completeViewText, onClick: this.props.toggleShowComplete })
+          _react2.default.createElement(
+            'button',
+            { type: 'button', onClick: this.props.toggleShowComplete },
+            completeViewText
+          )
         )
       );
     }
@@ -28431,6 +28556,10 @@ var addTask = function addTask(task) {
   return function (dispatch) {
     dispatch({ type: 'ADD_TASK_START' });
     _superagent2.default.post('/task').send({ task: task }).then(function (response) {
+      var task = response.body.task;
+      task.startDate = task.startDate ? new Date(task.startDate) : null;
+      task.dueDate = task.dueDate ? new Date(task.dueDate) : null;
+
       dispatch({ type: 'ADD_TASK_SUCCESS', data: { task: response.body.task } });
     }).catch(function (error) {
       dispatch({ type: 'ADD_TASK_FAILURE', data: { error: error } });
@@ -28441,10 +28570,14 @@ var addTask = function addTask(task) {
 var getTasks = function getTasks() {
   return function (dispatch) {
     dispatch({ type: 'GET_TASKS_START' });
-    _superagent2.default.get('/tasks')
-    //.query()
-    .then(function (response) {
-      dispatch({ type: 'GET_TASKS_SUCCESS', data: { tasks: response.body.tasks } });
+    _superagent2.default.get('/tasks').then(function (response) {
+      var tasks = response.body.tasks.map(function (task) {
+        task.startDate = task.startDate ? new Date(task.startDate) : null;
+        task.dueDate = task.dueDate ? new Date(task.dueDate) : null;
+        return task;
+      });
+
+      dispatch({ type: 'GET_TASKS_SUCCESS', data: { tasks: tasks } });
     }).catch(function (error) {
       dispatch({ type: 'GET_TASKS_FAILURE', data: { error: error } });
     });
@@ -28455,7 +28588,11 @@ var toggleComplete = function toggleComplete(taskID) {
   return function (dispatch) {
     dispatch({ type: 'TOGGLE_COMPLETE_START' });
     _superagent2.default.post('/complete').send({ id: taskID }).then(function (response) {
-      dispatch({ type: 'TOGGLE_COMPLETE_SUCCESS', data: { task: response.body.task } });
+      var task = response.body.task;
+      task.startDate = task.startDate ? new Date(task.startDate) : null;
+      task.dueDate = task.dueDate ? new Date(task.dueDate) : null;
+
+      dispatch({ type: 'TOGGLE_COMPLETE_SUCCESS', data: { task: task } });
     }).catch(function (error) {
       dispatch({ type: 'TOGGLE_COMPLETE_FAILURE', data: { error: error } });
     });
@@ -28466,7 +28603,11 @@ var changeCategory = function changeCategory(taskID, categoryID) {
   return function (dispatch) {
     dispatch({ type: 'CHANGE_CATEGORY_START' });
     _superagent2.default.post('/changeCategory').send({ taskID: taskID, categoryID: categoryID }).then(function (response) {
-      dispatch({ type: 'CHANGE_CATEGORY_SUCCESS', data: { task: response.body.task } });
+      var task = response.body.task;
+      task.startDate = task.startDate ? new Date(task.startDate) : null;
+      task.dueDate = task.dueDate ? new Date(task.dueDate) : null;
+
+      dispatch({ type: 'CHANGE_CATEGORY_SUCCESS', data: { task: task } });
     }).catch(function (error) {
       dispatch({ type: 'CHANGE_CATEGORY_FAILURE', data: { error: error } });
     });
@@ -28730,7 +28871,7 @@ exports = module.exports = __webpack_require__(254)();
 
 
 // module
-exports.push([module.i, "* {\n  margin: 0;\n  padding: 0; }\n\nbody {\n  background-color: #ECECEC;\n  font-family: \"Montserrat\", sans-serif;\n  font-size: 13pt; }\n\n.form-input {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-bottom: 14px; }\n\n.main-view {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: start;\n      -ms-flex-align: start;\n          align-items: flex-start;\n  width: 850px;\n  margin: auto; }\n\n.sidebar {\n  width: 200px;\n  margin-right: 6px; }\n\n.task-controls-wrapper {\n  width: 200px; }\n\n.category-list-wrapper {\n  width: calc(200px - 15px);\n  margin-top: 10px;\n  padding-top: 10px;\n  border-top: 1px solid #808080; }\n\n.category-item {\n  margin: 2px;\n  border-radius: 4px; }\n  .category-item:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.active-category {\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 4px; }\n  .active-category:hover {\n    background-color: #808080;\n    cursor: default; }\n\n.task-list-wrapper {\n  width: 650px; }\n\n.task-list {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 100%; }\n\n.task-wrapper {\n  background-color: #FAFAFA;\n  width: 100%;\n  margin-bottom: 10px;\n  border-radius: 5px; }\n  .task-wrapper:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.task-title {\n  margin-top: 3px;\n  margin-left: 3px; }\n\n.task-time {\n  margin-left: 3px; }\n\n.task-effort {\n  margin-left: 3px; }\n\n.task-focus {\n  margin-left: 3px; }\n\n.task-detail-wrapper {\n  position: fixed;\n  left: 50%;\n  top: 50%;\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n  width: 800px;\n  height: 750px;\n  background-color: #FAFAFA;\n  margin-bottom: 10px;\n  border-radius: 5px;\n  z-index: 2; }\n\n.task-detail-title {\n  margin-top: 3px;\n  margin-left: 3px; }\n\n.task-detail-time {\n  margin-left: 3px; }\n\n.task-detail-effort {\n  margin-left: 3px; }\n\n.task-detail-focus {\n  margin-left: 3px; }\n\n.mark-complete-button {\n  width: 20px;\n  height: 20px;\n  float: right; }\n  .mark-complete-button:hover {\n    cursor: pointer; }\n\n.mark-uncomplete-button {\n  width: 20px;\n  height: 20px; }\n  .mark-uncomplete-button:hover {\n    cursor: pointer; }\n\n.close-detail-view {\n  width: 20px;\n  height: 20px;\n  position: absolute;\n  top: 0px;\n  right: -20px; }\n  .close-detail-view:hover {\n    cursor: pointer; }\n\n.lightbox-dim {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.5);\n  z-index: 1; }\n", ""]);
+exports.push([module.i, "* {\n  margin: 0;\n  padding: 0; }\n\nbody {\n  background-color: #ECECEC;\n  font-family: \"Montserrat\", sans-serif;\n  font-size: 13pt; }\n\n.form-input {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-bottom: 14px; }\n\n.main-view {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: start;\n      -ms-flex-align: start;\n          align-items: flex-start;\n  width: 850px;\n  margin: auto; }\n\n.sidebar {\n  width: 200px;\n  margin-right: 6px; }\n\n.task-controls-wrapper {\n  width: 200px; }\n\n.category-list-wrapper {\n  width: calc(200px - 15px);\n  margin-top: 10px;\n  padding-top: 10px;\n  border-top: 1px solid #808080; }\n\n.category-item {\n  margin: 2px;\n  border-radius: 4px; }\n  .category-item:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.active-category {\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 4px; }\n  .active-category:hover {\n    background-color: #808080;\n    cursor: default; }\n\n.task-list-wrapper {\n  width: 650px; }\n\n.task-list {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 100%; }\n\n.task-wrapper {\n  background-color: #FAFAFA;\n  width: 100%;\n  margin-bottom: 10px;\n  border-radius: 5px; }\n  .task-wrapper:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.task-title {\n  margin-top: 3px;\n  margin-left: 3px; }\n\n.task-time {\n  margin-left: 3px; }\n\n.task-effort {\n  margin-left: 3px; }\n\n.task-focus {\n  margin-left: 3px; }\n\n.task-detail-wrapper {\n  position: fixed;\n  left: 50%;\n  top: 50%;\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n  width: 800px;\n  height: 750px;\n  background-color: #FAFAFA;\n  margin-bottom: 10px;\n  border-radius: 5px;\n  z-index: 2; }\n\n.task-detail-title {\n  margin-top: 3px;\n  margin-left: 3px; }\n\n.task-detail-time {\n  margin-left: 3px; }\n\n.task-detail-effort {\n  margin-left: 3px; }\n\n.task-detail-focus {\n  margin-left: 3px; }\n\n.mark-complete-button {\n  width: 20px;\n  height: 20px;\n  float: right; }\n  .mark-complete-button:hover {\n    cursor: pointer; }\n\n.mark-uncomplete-button {\n  width: 20px;\n  height: 20px; }\n  .mark-uncomplete-button:hover {\n    cursor: pointer; }\n\n.close-detail-view {\n  width: 20px;\n  height: 20px;\n  position: absolute;\n  top: 0px;\n  right: -20px; }\n  .close-detail-view:hover {\n    cursor: pointer; }\n\n.lightbox-dim {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.5);\n  z-index: 1; }\n\n.task-form-wrapper {\n  position: fixed;\n  left: 50%;\n  top: 50%;\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n  width: 650px;\n  height: 650px;\n  background-color: #FAFAFA;\n  border-radius: 5px;\n  z-index: 2; }\n\n.calendar-wrapper {\n  position: absolute;\n  width: 300px;\n  z-index: 3;\n  background-color: white;\n  border: 1px solid #808080;\n  border-radius: 3px; }\n\n.month-picker {\n  width: 300px;\n  height: 30px;\n  background-color: white;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  line-height: 30px; }\n\n.month-adjust {\n  width: 20px;\n  border-style: none; }\n  .month-adjust:hover {\n    cursor: pointer; }\n\n.curr-month {\n  text-align: center; }\n\n.week-header {\n  width: 300px;\n  height: 30px;\n  background-color: #E0E0E0;\n  display: -ms-grid;\n  display: grid;\n  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n  -ms-grid-rows: 20px;\n      grid-template-rows: 20px;\n  -ms-grid-column-align: center;\n      justify-items: center;\n  line-height: 30px; }\n\n.week-header-day {\n  width: 40px;\n  text-align: center; }\n\n.calendar-input-week {\n  display: -ms-grid;\n  display: grid;\n  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n  -ms-grid-rows: 20px;\n      grid-template-rows: 20px;\n  -ms-grid-column-align: center;\n      justify-items: center;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 300px;\n  margin-bottom: 4px;\n  text-align: center; }\n\n.calendar-day {\n  width: 40px;\n  border-radius: 2px;\n  text-align: center; }\n  .calendar-day:hover {\n    background-color: #4183D7;\n    cursor: pointer; }\n\n.off-month {\n  color: #E0E0E0; }\n\n.current-day {\n  border: 1px solid #808080; }\n\n.date-error-text {\n  color: #CF000F;\n  font-size: 10pt; }\n\n.date-input-show-calendar:hover {\n  cursor: pointer; }\n", ""]);
 
 // exports
 
@@ -29042,6 +29183,548 @@ function updateLink(linkElement, obj) {
 		URL.revokeObjectURL(oldSrc);
 }
 
+
+/***/ }),
+/* 256 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(8);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _CalendarInput = __webpack_require__(257);
+
+var _CalendarInput2 = _interopRequireDefault(_CalendarInput);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Class DateInput
+ * Wraps text & calendar widget inputs, and validates return.
+ * @prop {Date}     date  Initial date value to populate input with. Optional.
+ * @prop {Function} submit  Function to call upon date validation success
+ */
+var DateInput = function (_React$Component) {
+  _inherits(DateInput, _React$Component);
+
+  function DateInput(props) {
+    _classCallCheck(this, DateInput);
+
+    var _this = _possibleConstructorReturn(this, (DateInput.__proto__ || Object.getPrototypeOf(DateInput)).call(this, props));
+
+    _this.toggleCalendar = _this.toggleCalendar.bind(_this);
+    _this.padDate = _this.padDate.bind(_this);
+    _this.restrictInput = _this.restrictInput.bind(_this);
+    _this.sanitizeInput = _this.sanitizeInput.bind(_this);
+    _this.selectDate = _this.selectDate.bind(_this);
+    _this.validateInput = _this.validateInput.bind(_this);
+    _this.validateDate = _this.validateDate.bind(_this);
+
+    var date = _this.props.date ? _this.padDate(_this.props.date.getMonth() + 1) + '/' + _this.padDate(_this.props.date.getDate()) + '/' + _this.props.date.getFullYear() : '';
+
+    _this.state = {
+      dateInput: date,
+      dateInputCursor: date.length,
+      displayCalendar: false,
+      error: null
+    };
+    return _this;
+  }
+
+  _createClass(DateInput, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(newProps) {
+      if (newProps !== this.props) {
+        var date = newProps.date ? this.padDate(newProps.date.getMonth() + 1) + '/' + this.padDate(newProps.date.getDate()) + '/' + newProps.date.getFullYear() : '';
+
+        this.setState({
+          dateInput: date
+        });
+      }
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      this.refs.inputText.setSelectionRange(this.state.dateInputCursor, this.state.dateInputCursor);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var calendar = this.state.displayCalendar ? _react2.default.createElement(_CalendarInput2.default, { selectDate: this.selectDate, date: this.props.date }) : null;
+
+      var errorDisplay = this.state.error ? _react2.default.createElement(
+        'p',
+        { className: 'date-error-text' },
+        this.state.error
+      ) : null;
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'date-input-wrapper' },
+        _react2.default.createElement('input', {
+          className: 'date-input-text',
+          type: 'text',
+          placeholder: 'mm/dd/yyyy',
+          maxLength: '10',
+          value: this.state.dateInput,
+          onKeyDown: this.restrictInput,
+          onChange: this.sanitizeInput,
+          onBlur: function onBlur() {
+            _this2.validateInput();
+          },
+          ref: 'inputText'
+        }),
+        _react2.default.createElement(
+          'button',
+          {
+            type: 'button',
+            className: 'date-input-show-calendar',
+            onClick: function onClick() {
+              _this2.toggleCalendar();
+            }
+          },
+          '\uD83D\uDCC5'
+        ),
+        errorDisplay,
+        calendar
+      );
+    }
+  }, {
+    key: 'toggleCalendar',
+    value: function toggleCalendar() {
+      this.setState({
+        displayCalendar: !this.state.displayCalendar
+      });
+    }
+  }, {
+    key: 'padDate',
+    value: function padDate(date) {
+      return date.toString().padStart(2, '0');
+    }
+  }, {
+    key: 'restrictInput',
+    value: function restrictInput(event) {
+      var key = event.key ? event.key : String.fromCharCode(event.keyCode);
+
+      if (/[^\d]/.test(key)) {
+        return false;
+      }
+    }
+  }, {
+    key: 'sanitizeInput',
+    value: function sanitizeInput(event) {
+      var input = event.target.value;
+      // Capture cursor and # of / chars to ensure cursor doesn't move unexpectedly
+      var cursor = event.target.selectionStart;
+      var slashes = input.match(/\//g);
+      var numSlashes = slashes ? slashes.length : 0;
+      var numNewSlashes = 0;
+
+      input = input.replace(/\//g, '');
+      if (input.length >= 2) {
+        input = input.slice(0, 2) + '/' + input.slice(2);
+        numNewSlashes += 1;
+      }
+      if (input.length >= 5) {
+        input = input.slice(0, 5) + '/' + input.slice(5);
+        numNewSlashes += 1;
+      }
+
+      // e.g. if we had 0 slashes before and have 1 now, we need to advance the cursor past the new slash
+      cursor += numNewSlashes - numSlashes;
+
+      this.setState({ dateInput: input, dateInputCursor: cursor });
+    }
+  }, {
+    key: 'selectDate',
+    value: function selectDate(day, month, year) {
+      // Close calendar widget on date select
+      this.setState({
+        displayCalendar: false
+      });
+
+      var date = this.padDate(month + 1) + '/' + this.padDate(day) + '/' + year;
+      this.setState({ dateInput: date });
+
+      this.validateDate(day, month, year);
+    }
+  }, {
+    key: 'validateInput',
+    value: function validateInput() {
+      if (this.state.dateInput !== '') {
+        if (/\d{1,2}\/\d{1,2}\/\d{4}/.test(this.state.dateInput)) {
+          var dateFields = this.state.dateInput.split('/');
+          var month = parseInt(dateFields[0]) - 1;
+          var day = parseInt(dateFields[1]);
+          var year = parseInt(dateFields[2]);
+
+          this.validateDate(day, month, year);
+        } else {
+          this.setState({
+            error: 'Invalid date'
+          });
+        }
+      } else {
+        this.props.submit(null);
+      }
+    }
+  }, {
+    key: 'validateDate',
+    value: function validateDate(day, month, year) {
+      var returnDate = new Date(year, month, day);
+      if (returnDate === 'Invalid Date' || month !== returnDate.getMonth() || day !== returnDate.getDate() || year !== returnDate.getFullYear()) {
+        this.setState({
+          error: 'Invalid date'
+        });
+      } else {
+        this.setState({
+          error: null
+        });
+        this.props.submit(returnDate);
+      }
+    }
+  }]);
+
+  return DateInput;
+}(_react2.default.Component);
+
+exports.default = DateInput;
+
+/***/ }),
+/* 257 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(8);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _CalendarInputWeek = __webpack_require__(258);
+
+var _CalendarInputWeek2 = _interopRequireDefault(_CalendarInputWeek);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Class CalendarInput
+ * Creates & display calendar widget
+ * @prop {Date}     date  Initial date value to populate input with. If null, new Date() will be used
+ * @prop {Function} selectDate  Function to call when a date is clicked
+ */
+var CalendarInput = function (_React$Component) {
+  _inherits(CalendarInput, _React$Component);
+
+  function CalendarInput(props) {
+    _classCallCheck(this, CalendarInput);
+
+    var _this = _possibleConstructorReturn(this, (CalendarInput.__proto__ || Object.getPrototypeOf(CalendarInput)).call(this, props));
+
+    _this.getMonthString = _this.getMonthString.bind(_this);
+
+    var currentDate = _this.props.date ? _this.props.date : new Date();
+
+    _this.state = {
+      day: currentDate.getDate(),
+      month: currentDate.getMonth(),
+      year: currentDate.getFullYear()
+    };
+    return _this;
+  }
+
+  _createClass(CalendarInput, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(newProps) {
+      if (newProps !== this.props) {
+        var currentDate = this.props.date ? this.props.date : new Date();
+
+        this.setState({
+          day: currentDate.getDate(),
+          month: currentDate.getMonth(),
+          year: currentDate.getFullYear()
+        });
+      }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      // Need to create days starting from first Sunday of previous month (or
+      // first day of this month if it is a Sunday), until first Monday of
+      // next month (or last day of this month if it is a Monday)
+
+      var calendarDate = new Date(this.state.year, this.state.month, 1);
+      var beginningOffset = calendarDate.getDay() % 7;
+
+      // This will automatically set month as well, if necessary
+      calendarDate.setDate(calendarDate.getDate() - beginningOffset);
+
+      var createdLastDay = false;
+      var dates = [];
+
+      while (!createdLastDay) {
+        dates.push({
+          date: calendarDate.getDate(),
+          month: calendarDate.getMonth(),
+          year: calendarDate.getFullYear()
+        });
+
+        calendarDate.setDate(calendarDate.getDate() + 1);
+        // If you ever reach Sunday of next month, you know you're done
+        if ((calendarDate.getMonth() > this.state.month || calendarDate.getFullYear() > this.state.year) && calendarDate.getDay() === 0) {
+          createdLastDay = true;
+        }
+      }
+
+      var weeks = [];
+      while (dates.length > 0) {
+        var days = dates.splice(0, 7);
+        weeks.push({ days: days });
+      }
+
+      var calendarDates = weeks.map(function (week) {
+        return _react2.default.createElement(_CalendarInputWeek2.default, {
+          key: 'week' + week.days[0].date + week.days[0].month,
+          month: _this2.state.month,
+          currentDay: _this2.state.day,
+          days: week.days,
+          selectDate: _this2.props.selectDate
+        });
+      });
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'calendar-wrapper' },
+        _react2.default.createElement(
+          'div',
+          { className: 'month-picker' },
+          _react2.default.createElement(
+            'button',
+            {
+              className: 'month-adjust',
+              onClick: function onClick() {
+                if (_this2.state.month === 0) {
+                  _this2.setState({ month: 11, year: _this2.state.year - 1 });
+                } else {
+                  _this2.setState({ month: _this2.state.month - 1 });
+                }
+              } },
+            '<'
+          ),
+          _react2.default.createElement(
+            'span',
+            { className: 'curr-month' },
+            this.getMonthString(),
+            ' ',
+            this.state.year
+          ),
+          _react2.default.createElement(
+            'button',
+            {
+              className: 'month-adjust',
+              onClick: function onClick() {
+                if (_this2.state.month === 11) {
+                  _this2.setState({ month: 0, year: _this2.state.year + 1 });
+                } else {
+                  _this2.setState({ month: _this2.state.month + 1 });
+                }
+              } },
+            '>'
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'week-header' },
+          _react2.default.createElement(
+            'span',
+            { className: 'week-header-day' },
+            'Sun'
+          ),
+          _react2.default.createElement(
+            'span',
+            { className: 'week-header-day' },
+            'Mon'
+          ),
+          _react2.default.createElement(
+            'span',
+            { className: 'week-header-day' },
+            'Tue'
+          ),
+          _react2.default.createElement(
+            'span',
+            { className: 'week-header-day' },
+            'Wed'
+          ),
+          _react2.default.createElement(
+            'span',
+            { className: 'week-header-day' },
+            'Thu'
+          ),
+          _react2.default.createElement(
+            'span',
+            { className: 'week-header-day' },
+            'Fri'
+          ),
+          _react2.default.createElement(
+            'span',
+            { className: 'week-header-day' },
+            'Sat'
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'calendar-dates' },
+          calendarDates
+        )
+      );
+    }
+  }, {
+    key: 'getMonthString',
+    value: function getMonthString() {
+      switch (this.state.month) {
+        case 0:
+          return 'January';
+        case 1:
+          return 'February';
+        case 2:
+          return 'March';
+        case 3:
+          return 'April';
+        case 4:
+          return 'May';
+        case 5:
+          return 'June';
+        case 6:
+          return 'July';
+        case 7:
+          return 'August';
+        case 8:
+          return 'September';
+        case 9:
+          return 'October';
+        case 10:
+          return 'November';
+        case 11:
+          return 'December';
+      }
+    }
+  }]);
+
+  return CalendarInput;
+}(_react2.default.Component);
+
+exports.default = CalendarInput;
+
+/***/ }),
+/* 258 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(8);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Class CalendarInputWeek
+ * Populates a single row of the calendar widget
+ * @prop {Number} month  Numeric value of current month. Used for applying classes
+ * @prop {Number} currentDay  Numeric value of current day. Used for applying classes
+ * @prop {Array} days  Array of date objects { date: {Number}, month: {Number}, year: {Number}, }
+ * @prop {Function} selectDate  Function to call when an individual date is clicked
+ */
+var CalendarInputWeek = function (_React$Component) {
+  _inherits(CalendarInputWeek, _React$Component);
+
+  function CalendarInputWeek(props) {
+    _classCallCheck(this, CalendarInputWeek);
+
+    return _possibleConstructorReturn(this, (CalendarInputWeek.__proto__ || Object.getPrototypeOf(CalendarInputWeek)).call(this, props));
+  }
+
+  _createClass(CalendarInputWeek, [{
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var days = this.props.days.map(function (day) {
+        var classes = 'calendar-day';
+        if (day.month !== _this2.props.month) {
+          classes += ' off-month';
+        } else if (day.date === _this2.props.currentDay) {
+          classes += ' current-day';
+        }
+
+        return _react2.default.createElement(
+          'p',
+          {
+            key: 'day' + day.date + day.month,
+            className: classes,
+            onClick: function onClick() {
+              _this2.props.selectDate(day.date, day.month, day.year);
+            } },
+          day.date
+        );
+      });
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'calendar-input-week' },
+        days
+      );
+    }
+  }]);
+
+  return CalendarInputWeek;
+}(_react2.default.Component);
+
+exports.default = CalendarInputWeek;
 
 /***/ })
 /******/ ]);
