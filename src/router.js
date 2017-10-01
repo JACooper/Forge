@@ -26,6 +26,7 @@ const router = (app) => {
   // -- Task routes --
   app.post('/task', controllers.Task.createTask);
   app.get('/tasks', controllers.Task.getTasks);
+  app.post('/update', controllers.Task.updateTask);
   app.post('/complete', controllers.Task.toggleComplete);
   app.post('/changeCategory', controllers.Task.changeCategory);
 
