@@ -20,7 +20,7 @@ npm install
 npm start
 ```
 
-This will start the server listening for connections. To access the app, go to localhost:3000 on the webpage of your choice. To run with the Chrome debugger attached, run
+This will start the server listening for connections. To access the app, go to localhost:3000 in the web browser of your choice. To run with the Chrome debugger attached, run
 
 ```
 npm run start-debug
