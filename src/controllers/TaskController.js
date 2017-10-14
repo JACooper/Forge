@@ -80,6 +80,7 @@ const updateTask = (_request, _response) => {
   const request = _request;
   const response = _response;
 
+  // Collect and sanitize request data
   const id = request.body.task._id.toString();
   const title = request.body.task.title.toString();
   const time = request.body.task.time;
@@ -95,6 +96,7 @@ const updateTask = (_request, _response) => {
     focus,
   };
 
+  // Validate and reconstruct dates, if given
   if (request.body.task.startDate) {
     const startDate = Date.parse(request.body.task.startDate.toString());
     
@@ -120,20 +122,78 @@ const updateTask = (_request, _response) => {
     return response.status(400).json({ error: 'Start date cannot be after than due date' });
   }
 
+  // Perform update
   const search = { user: request.user._id, _id: id };
   const update = taskData;
   return Task.findOneAndUpdate(search, update, { new: true })
-    .select('category title time effort focus complete startDate dueDate')
+    // .select('category title time effort focus complete startDate dueDate')
     .populate('category')
     .exec()
-    .then((updatedTask) => {
-      return response.status(200).json({ task: updatedTask });
+    .then((task) => {
+      return response.status(200).json({ task });
     })
     .catch((error) => {
       console.dir(error);
       return response.status(500).json({ error: 'An error occurred updating the task' });
     });
 };
+
+const addLog = (_request, _response) => {
+  const request = _request;
+  const response = _response;
+
+  const taskID = request.body.taskID.toString();
+
+  const log = {};
+
+  // Validate and reconstruct dates, if given
+  if (request.body.date) {
+    const date = Date.parse(request.body.date.toString());
+    
+    if (!isNaN(date)) {
+      log.date = new Date(date);
+    } else {
+      return response.status(400).json({ error: 'Invalid log date supplied' });
+    }
+  }
+
+  if (request.body.desc) {
+    log.desc = request.body.desc.toString();
+  }
+
+  if (request.body.time) {
+    log.time = request.body.time;
+  }
+
+  if (log.desc === undefined && log.time === undefined) {
+    return response.status(400).json({ error: 'Work logs must have at least a description or a time' });
+  }
+
+  const search = { user: request.user._id, _id: taskID };
+  const update = { '$push': { 'log': log } };
+  return Task.findOneAndUpdate(search, update, { new: true })
+    .populate('category')
+    .exec()
+    .then((task) => {
+      return response.status(200).json({ task });
+    })
+    .catch((error) => {
+      console.dir(error);
+      return response.status(500).json({ error: 'An error occurred adding the log'});
+    });
+};
+
+// const updateLog = (_request, _response) => {
+//   const request = _request;
+//   const response = _response;
+
+//   const taskID = request.body.taskID.toString();
+//   const updatedLogDesc = request.body.logDesc.toString();
+//   const updatedLogTime = request.body.logTime;
+
+//   const search = { user: request.user._id, _id: taskID };
+
+// }
 
 const toggleComplete = (_request, _response) => {
   const request = _request;
@@ -177,5 +237,6 @@ const changeCategory = (_request, _response) => {
 module.exports.createTask = createTask;
 module.exports.getTasks = getTasks;
 module.exports.updateTask = updateTask;
+module.exports.addLog = addLog;
 module.exports.toggleComplete = toggleComplete;
 module.exports.changeCategory = changeCategory;
