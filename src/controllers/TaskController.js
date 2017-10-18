@@ -80,23 +80,48 @@ const updateTask = (_request, _response) => {
   const request = _request;
   const response = _response;
 
-  const id = request.body.task._id.toString();
-  const title = request.body.task.title.toString();
-  const time = request.body.task.time;
-  const effort = request.body.task.effort;
-  const focus = request.body.task.focus;
-  const category = request.body.task.category._id.toString();
-  
-  const taskData = {
-    category,
-    title,
-    time,
-    effort,
-    focus,
-  };
+  const id = request.body.id.toString();
 
-  if (request.body.task.startDate) {
-    const startDate = Date.parse(request.body.task.startDate.toString());
+  const taskData = {};
+
+  if (request.body.title) {
+    taskData.title = request.body.title.toString();
+  }
+
+  if (request.body.time) {
+    if (!isNaN(request.body.time)) {
+      taskData.time = request.body.time;
+    } else {
+      return response.status(400).json({ error: 'Invalid data supplied' });
+    }
+  }
+
+  if (request.body.effort) {
+    if (!isNaN(request.body.effort)) {
+      taskData.effort = request.body.effort;
+    } else {
+      return response.status(400).json({ error: 'Invalid data supplied' });
+    }
+  }
+
+  if (request.body.focus) {
+    if (!isNaN(request.body.focus)) {
+      taskData.focus = request.body.focus;
+    } else {
+      return response.status(400).json({ error: 'Invalid data supplied' });
+    }
+  }
+
+  if (request.body.category) {
+    if (request.body.category._id) {
+      taskData.category = request.body.category._id.toString();
+    } else {
+      return response.status(400).json({ error: 'Invalid data supplied' });
+    }
+  }
+
+  if (request.body.startDate) {
+    const startDate = Date.parse(request.body.startDate.toString());
     
     if (!isNaN(startDate)) {
       taskData.startDate = new Date(startDate);
@@ -105,8 +130,8 @@ const updateTask = (_request, _response) => {
     }
   }
 
-  if (request.body.task.dueDate) {
-    const dueDate = Date.parse(request.body.task.dueDate.toString());
+  if (request.body.dueDate) {
+    const dueDate = Date.parse(request.body.dueDate.toString());
     
     if (!isNaN(dueDate)) {
       taskData.dueDate = new Date(dueDate);
@@ -123,7 +148,6 @@ const updateTask = (_request, _response) => {
   const search = { user: request.user._id, _id: id };
   const update = taskData;
   return Task.findOneAndUpdate(search, update, { new: true })
-    .select('category title time effort focus complete startDate dueDate')
     .populate('category')
     .exec()
     .then((updatedTask) => {
@@ -135,12 +159,56 @@ const updateTask = (_request, _response) => {
     });
 };
 
+const addLog = (_request, _response) => {
+  const request = _request;
+  const response = _response;
+
+  const taskID = request.body.taskID.toString();
+
+  const log = {};
+
+  // Validate and reconstruct dates, if given
+  if (request.body.date) {
+    const date = Date.parse(request.body.date.toString());
+    
+    if (!isNaN(date)) {
+      log.date = new Date(date);
+    } else {
+      return response.status(400).json({ error: 'Invalid log date supplied' });
+    }
+  }
+
+  if (request.body.desc) {
+    log.desc = request.body.desc.toString();
+  }
+
+  if (request.body.time) {
+    log.time = request.body.time;
+  }
+
+  if (log.desc === undefined && log.time === undefined) {
+    return response.status(400).json({ error: 'Work logs must have at least a description or a time' });
+  }
+
+  const search = { user: request.user._id, _id: taskID };
+  const update = { '$push': { 'log': log } };
+  return Task.findOneAndUpdate(search, update, { new: true })
+    .populate('category')
+    .exec()
+    .then((task) => {
+      return response.status(200).json({ task });
+    })
+    .catch((error) => {
+      console.dir(error);
+      return response.status(500).json({ error: 'An error occurred adding the log'});
+    });
+};
+
 const toggleComplete = (_request, _response) => {
   const request = _request;
   const response = _response;
 
   return Task.findOne({ user: request.user._id, _id: request.body.id })
-    .select('category title time effort focus complete startDate dueDate')
     .populate('category')
     .exec()
     .then((task) => {
@@ -177,5 +245,6 @@ const changeCategory = (_request, _response) => {
 module.exports.createTask = createTask;
 module.exports.getTasks = getTasks;
 module.exports.updateTask = updateTask;
+module.exports.addLog = addLog;
 module.exports.toggleComplete = toggleComplete;
 module.exports.changeCategory = changeCategory;

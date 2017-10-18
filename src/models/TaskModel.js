@@ -24,11 +24,6 @@ const TaskSchema = new mongoose.Schema({
     required: true,
   },
 
-  // description: {
-  //   type: String,
-  //   trim: true,
-  // },
-
   time: {
     type: Number,
     min: 1,
@@ -64,7 +59,17 @@ const TaskSchema = new mongoose.Schema({
 
   dueDate: {
     type: Date,
-  }
+  },
+
+  log: {
+    type: Array,
+    default: [],
+  },
+
+  // notes: {
+  //   type: String,
+  //   trim: true,
+  // }
 
   // reminder: {
   //   type: Boolean,
@@ -109,16 +114,15 @@ const TaskSchema = new mongoose.Schema({
 
 TaskSchema.statics.findTasksByUser = (userID, callback) => {
   return TaskModel.find({ user: mongoose.Types.ObjectId(userID) })
-    .select('category title time effort focus complete startDate dueDate')
     .populate('category')
     .exec(callback);
 };
 
-TaskSchema.statics.findTasksByCategory = (categoryID, callback) => {
-  return TaskModel.find({ category: mongoose.Types.ObjectId(categoryID) })
-    .select('title time effort focus complete startDate dueDate')
-    .exec(callback);
-};
+// TaskSchema.statics.findTasksByCategory = (categoryID, callback) => {
+//   return TaskModel.find({ category: mongoose.Types.ObjectId(categoryID) })
+//     .select('title time effort focus complete startDate dueDate')
+//     .exec(callback);
+// };
 
 TaskModel = mongoose.model('Task', TaskSchema);
 
