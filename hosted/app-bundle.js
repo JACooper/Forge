@@ -6852,17 +6852,13 @@ var DateInput = function (_React$Component) {
           },
           ref: 'inputText'
         }),
-        _react2.default.createElement(
-          'button',
-          {
-            type: 'button',
-            className: 'date-input-show-calendar',
-            onClick: function onClick() {
-              _this2.toggleCalendar();
-            }
-          },
-          '\uD83D\uDCC5'
-        ),
+        _react2.default.createElement('button', {
+          className: 'date-input-show-calendar',
+          type: 'button',
+          onClick: function onClick() {
+            _this2.toggleCalendar();
+          }
+        }),
         errorDisplay,
         calendar
       );
@@ -6947,11 +6943,10 @@ var DateInput = function (_React$Component) {
 
           this.validateDate(day, month, year);
         } else {
-          this.setState({
-            error: 'Invalid date'
-          });
+          this.setState({ error: 'Invalid date' });
         }
       } else {
+        this.setState({ error: null });
         this.props.submit(null);
       }
     }
@@ -6960,14 +6955,10 @@ var DateInput = function (_React$Component) {
     value: function validateDate(day, month, year) {
       var returnDate = new Date(year, month, day);
       if (returnDate === 'Invalid Date' || month !== returnDate.getMonth() || day !== returnDate.getDate() || year !== returnDate.getFullYear()) {
-        this.setState({
-          error: 'Invalid date'
-        });
+        this.setState({ error: 'Invalid date' });
       } else {
         returnDate.setSeconds(0);
-        this.setState({
-          error: null
-        });
+        this.setState({ error: null });
         this.props.submit(returnDate);
       }
     }
@@ -7065,11 +7056,11 @@ if (typeof window !== 'undefined') { // Browser window
   root = this;
 }
 
-var Emitter = __webpack_require__(248);
-var RequestBase = __webpack_require__(249);
+var Emitter = __webpack_require__(249);
+var RequestBase = __webpack_require__(250);
 var isObject = __webpack_require__(100);
-var ResponseBase = __webpack_require__(250);
-var shouldRetry = __webpack_require__(252);
+var ResponseBase = __webpack_require__(251);
+var shouldRetry = __webpack_require__(253);
 
 /**
  * Noop.
@@ -12511,7 +12502,7 @@ var _Wrapper = __webpack_require__(236);
 
 var _Wrapper2 = _interopRequireDefault(_Wrapper);
 
-__webpack_require__(257);
+__webpack_require__(258);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26484,6 +26475,11 @@ function reduce() {
       return _extends({}, state, {
         detailView: null
       });
+
+    case 'SET_ACTIVE_CATEGORY':
+      return _extends({}, state, {
+        detailView: null
+      });
   }
 
   return state;
@@ -26514,7 +26510,7 @@ var _App = __webpack_require__(237);
 
 var _App2 = _interopRequireDefault(_App);
 
-var _Auth = __webpack_require__(256);
+var _Auth = __webpack_require__(257);
 
 var _Auth2 = _interopRequireDefault(_Auth);
 
@@ -26605,11 +26601,11 @@ var _TaskList = __webpack_require__(241);
 
 var _TaskList2 = _interopRequireDefault(_TaskList);
 
-var _CategoryList = __webpack_require__(246);
+var _CategoryList = __webpack_require__(247);
 
 var _CategoryList2 = _interopRequireDefault(_CategoryList);
 
-var _TaskControls = __webpack_require__(247);
+var _TaskControls = __webpack_require__(248);
 
 var _TaskControls2 = _interopRequireDefault(_TaskControls);
 
@@ -26617,15 +26613,15 @@ var _authActions = __webpack_require__(56);
 
 var AuthActions = _interopRequireWildcard(_authActions);
 
-var _categoryActions = __webpack_require__(253);
+var _categoryActions = __webpack_require__(254);
 
 var CategoryActions = _interopRequireWildcard(_categoryActions);
 
-var _taskActions = __webpack_require__(254);
+var _taskActions = __webpack_require__(255);
 
 var TaskActions = _interopRequireWildcard(_taskActions);
 
-var _viewActions = __webpack_require__(255);
+var _viewActions = __webpack_require__(256);
 
 var ViewActions = _interopRequireWildcard(_viewActions);
 
@@ -26677,6 +26673,7 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
     _this.addCategory = _this.addCategory.bind(_this);
     _this.getCategories = _this.getCategories.bind(_this);
 
+    _this.toggleComplete = _this.toggleComplete.bind(_this);
     _this.openDetail = _this.openDetail.bind(_this);
     _this.closeDetail = _this.closeDetail.bind(_this);
     _this.changeSortType = _this.changeSortType.bind(_this);
@@ -26761,12 +26758,15 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
             emphasisValue: this.props.emphasis,
             updateTasks: this.getTasks,
             openDetail: this.openDetail,
+            toggleComplete: this.toggleComplete,
             detailView: this.props.detailView,
             categories: this.props.categories,
             updatingTask: this.props.updatingTask,
             closeDetail: this.closeDetail,
             updateTask: this.updateTask,
-            addLog: this.addLog
+            addLog: this.addLog,
+            updateTaskSuccess: this.props.updateTaskSuccess,
+            addLogSuccess: this.props.addLogSuccess
           }),
           lightbox
         )
@@ -26823,6 +26823,11 @@ var App = (_dec = (0, _reactRedux.connect)(function (store) {
     key: 'getTasks',
     value: function getTasks() {
       this.props.dispatch(TaskActions.getTasks());
+    }
+  }, {
+    key: 'toggleComplete',
+    value: function toggleComplete(taskID) {
+      this.props.dispatch(TaskActions.toggleComplete(taskID));
     }
   }, {
     key: 'openDetail',
@@ -27445,6 +27450,7 @@ var TaskList = function (_React$Component) {
         });
       }
 
+      // For stable sorting in case of equal sums, etc.
       for (var i = 0; i < sortedTasks.length; i++) {
         sortedTasks[i].position = i;
       }
@@ -27480,9 +27486,11 @@ var TaskList = function (_React$Component) {
             key: task._id,
             categories: _this2.props.categories,
             updatingTask: _this2.props.updatingTask,
-            closeDetail: _this2.closeDetail,
+            closeDetail: _this2.props.closeDetail,
             updateTask: _this2.props.updateTask,
-            addLog: _this2.props.addLog
+            addLog: _this2.props.addLog,
+            updateTaskSuccess: _this2.props.updateTaskSuccess,
+            addLogSuccess: _this2.props.addLogSuccess
           }));
         } else {
           return _react2.default.createElement(_Task2.default, _extends({}, task, {
@@ -27641,66 +27649,6 @@ var Task = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      // let time = '';
-      // let effort = '';
-      // let focus = '';
-
-      // for (let stars = 1; stars <= 3; stars++) {
-      //   if (stars <= this.props.time) {
-      //     time += '\u2605';
-      //   } else {
-      //     time += '\u2606';
-      //   }
-
-      //   if (stars <= this.props.effort) {
-      //     effort += '\u2605';
-      //   } else {
-      //     effort += '\u2606';
-      //   }
-
-      //   if (stars <= this.props.focus) {
-      //     focus += '\u2605';
-      //   } else {
-      //     focus += '\u2606';
-      //   }
-      // }
-
-      // let timeClass;
-      // switch (this.props.time) {
-      // case 1:
-      //   timeClass = 'task-img task-rating one-star';
-      //   break;
-      // case 2:
-      //   timeClass = 'task-img task-rating two-stars';
-      //   break;
-      // case 3:
-      //   timeClass = 'task-img task-rating three-stars';
-      // }
-
-      // let effortClass;
-      // switch (this.props.effort) {
-      // case 1:
-      //   effortClass = 'task-img task-rating one-star';
-      //   break;
-      // case 2:
-      //   effortClass = 'task-img task-rating two-stars';
-      //   break;
-      // case 3:
-      //   effortClass = 'task-img task-rating three-stars';
-      // }
-
-      // let focusClass;
-      // switch (this.props.focus) {
-      // case 1:
-      //   focusClass = 'task-img task-rating one-star';
-      //   break;
-      // case 2:
-      //   focusClass = 'task-img task-rating two-stars';
-      //   break;
-      // case 3:
-      //   focusClass = 'task-img task-rating three-stars';
-      // }
-
       var timeRating = [];
       var effortRating = [];
       var focusRating = [];
@@ -27725,15 +27673,29 @@ var Task = function (_React$Component) {
         }
       }
 
+      var toggleButtonClass = this.props.complete ? 'task-toggle-complete' : 'task-toggle-uncomplete';
+
       return _react2.default.createElement(
         'div',
         { className: 'task-wrapper', onClick: function onClick() {
             _this2.props.openDetail(_this2.props._id);
           } },
         _react2.default.createElement(
-          'p',
-          { className: 'task-title' },
-          this.props.title
+          'div',
+          { className: 'task-header-bar' },
+          _react2.default.createElement(
+            'p',
+            { className: 'task-title' },
+            this.props.title
+          ),
+          _react2.default.createElement('button', {
+            className: toggleButtonClass,
+            type: 'button',
+            onClick: function onClick(e) {
+              _this2.props.toggleComplete(_this2.props._id);
+              e.stopPropagation();
+            }
+          })
         ),
         _react2.default.createElement(
           'div',
@@ -27783,13 +27745,17 @@ var _DateInput = __webpack_require__(55);
 
 var _DateInput2 = _interopRequireDefault(_DateInput);
 
-var _DateTimeInput = __webpack_require__(244);
-
-var _DateTimeInput2 = _interopRequireDefault(_DateTimeInput);
-
-var _LogDetail = __webpack_require__(245);
+var _LogDetail = __webpack_require__(244);
 
 var _LogDetail2 = _interopRequireDefault(_LogDetail);
+
+var _LogForm = __webpack_require__(245);
+
+var _LogForm2 = _interopRequireDefault(_LogForm);
+
+var _Rating = __webpack_require__(262);
+
+var _Rating2 = _interopRequireDefault(_Rating);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -27808,9 +27774,14 @@ var TaskDetail = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (TaskDetail.__proto__ || Object.getPrototypeOf(TaskDetail)).call(this, props));
 
     _this.updateTask = _this.updateTask.bind(_this);
-    _this.addWorkLog = _this.addWorkLog.bind(_this);
     _this.showLogForm = _this.showLogForm.bind(_this);
     _this.closeLogForm = _this.closeLogForm.bind(_this);
+    _this.changeDifficulty = _this.changeDifficulty.bind(_this);
+
+    var showLogDefault = false;
+    if (_this.props.log && _this.props.log.length < 4) {
+      showLogDefault = true;
+    }
 
     // Only use task props for initial state - subsequent form data should come from user input
     _this.state = {
@@ -27822,106 +27793,119 @@ var TaskDetail = function (_React$Component) {
       startDate: _this.props.startDate,
       dueDate: _this.props.dueDate,
       complete: _this.props.complete,
-      logDate: new Date(),
-      logDesc: '',
-      logTime: '',
-      // showLog: false,
-      showLogForm: false,
-      dirty: false
+      showLog: showLogDefault,
+      showLogForm: false
     };
     return _this;
   }
+
+  // componentWillReceiveProps(newProps) {
+  //   if (newProps.updateTaskSuccess !== this.props.updateTaskSuccess && newProps.updateTaskSuccess) {
+  //     this.props.closeDetail();
+  //   }
+  // }
 
   _createClass(TaskDetail, [{
     key: 'render',
     value: function render() {
       var _this2 = this;
 
-      var timeRating = [];
-      var effortRating = [];
-      var focusRating = [];
+      // const timeRating = [];
+      // const effortRating = [];
+      // const focusRating = [];
 
-      for (var stars = 1; stars <= 3; stars++) {
-        if (stars <= this.props.time) {
-          timeRating.push(_react2.default.createElement('div', { className: 'task-rating-full', key: stars }));
-        } else {
-          timeRating.push(_react2.default.createElement('div', { className: 'task-rating-empty', key: stars }));
+      // timeRating.push(<div className='task-detail-rating-full' key={1}/>);
+      // effortRating.push(<div className='task-detail-rating-full' key={1}/>);
+      // focusRating.push(<div className='task-detail-rating-full' key={1}/>);
+
+      // for (let stars = 2; stars <= 3; stars++) {
+      //   if (stars <= this.state.time) {
+      //     timeRating.push(
+      //       <div
+      //         className='task-detail-rating-full task-detail-full-editable'
+      //         key={stars}
+      //         onClick={() => {this.changeDifficulty('time', stars, false);}}
+      //       />);
+      //   } else {
+      //     timeRating.push(
+      //       <div
+      //         className='task-detail-rating-empty task-detail-empty-editable'
+      //         key={stars}
+      //         onClick={() => {this.changeDifficulty('time', stars, true);}}
+      //       />);
+      //   }
+
+      //   if (stars <= this.state.effort) {
+      //     effortRating.push(
+      //       <div
+      //         className='task-detail-rating-full task-detail-full-editable'
+      //         key={stars}
+      //         onClick={() => {this.changeDifficulty('effort', stars, false);}}
+      //       />);
+      //   } else {
+      //     effortRating.push(
+      //       <div
+      //         className='task-detail-rating-empty task-detail-empty-editable'
+      //         key={stars}
+      //         onClick={() => {this.changeDifficulty('effort', stars, true);}}
+      //       />);
+      //   }
+
+      //   if (stars <= this.state.focus) {
+      //     focusRating.push(
+      //       <div
+      //         className='task-detail-rating-full task-detail-full-editable'
+      //         key={stars}
+      //         onClick={() => {this.changeDifficulty('focus', stars, false);}}
+      //       />);
+      //   } else {
+      //     focusRating.push(
+      //       <div
+      //         className='task-detail-rating-empty task-detail-empty-editable'
+      //         key={stars}
+      //         onClick={() => {this.changeDifficulty('focus', stars, true);}}
+      //       />);
+      //   }
+      // }
+
+      var categoryOptions = this.props.categories.map(function (category) {
+        return _react2.default.createElement(
+          'option',
+          { key: category._id, className: 'category-option', value: category._id },
+          category.name
+        );
+      });
+
+      var showFormButton = this.state.showLog ? _react2.default.createElement('button', {
+        className: 'show-log-form',
+        type: 'button',
+        onClick: function onClick() {
+          _this2.showLogForm();
         }
+      }) : null;
 
-        if (stars <= this.props.effort) {
-          effortRating.push(_react2.default.createElement('div', { className: 'task-rating-full', key: stars }));
-        } else {
-          effortRating.push(_react2.default.createElement('div', { className: 'task-rating-empty', key: stars }));
-        }
-
-        if (stars <= this.props.focus) {
-          focusRating.push(_react2.default.createElement('div', { className: 'task-rating-full', key: stars }));
-        } else {
-          focusRating.push(_react2.default.createElement('div', { className: 'task-rating-empty', key: stars }));
-        }
-      }
-
-      var addLog = this.state.showLogForm ? _react2.default.createElement(
+      var logForm = this.state.showLogForm ? _react2.default.createElement(
         'div',
-        null,
-        _react2.default.createElement(_DateTimeInput2.default, { date: this.state.logDate, submit: this.setLogDate }),
-        _react2.default.createElement('input', {
-          className: 'log-detail-desc',
-          type: 'text',
-          placeholder: 'Work log description',
-          value: this.state.logDesc,
-          onChange: function onChange(e) {
-            _this2.setState({ logDesc: e.target.value });
-          }
-        }),
-        _react2.default.createElement('input', {
-          className: 'log-detail-time',
-          type: 'text',
-          placeholder: '# hrs',
-          value: this.state.logTime,
-          onKeyDown: this.restrictInput,
-          onChange: function onChange(e) {
-            _this2.setState({ logTime: e.target.value });
-          }
-        }),
-        _react2.default.createElement(
-          'button',
-          {
-            className: 'add-detail-log',
-            type: 'button',
-            onClick: function onClick() {
-              _this2.addWorkLog();
-            }
-          },
-          'Log work'
-        ),
-        _react2.default.createElement(
-          'button',
-          {
-            className: 'cancel-detail-log',
-            type: 'button',
-            onClick: function onClick() {
-              _this2.closeLogForm();
-            }
-          },
-          'Cancel'
-        )
-      ) : _react2.default.createElement(
-        'button',
-        {
-          className: 'show-detail-log',
-          type: 'button',
-          onClick: function onClick() {
-            _this2.showLogForm();
-          }
-        },
-        'Log work'
-      );
+        { className: 'log-form-modal-wrapper' },
+        _react2.default.createElement('div', { className: 'lightbox-dim' }),
+        _react2.default.createElement(_LogForm2.default, {
+          addLogSuccess: this.props.addLogSuccess,
+          addLog: this.props.addLog,
+          closeLogForm: this.closeLogForm
+        })
+      ) : null;
 
+      // TODO: Should sort logs by date
       var logIndex = 0;
-      var workLog = this.props.log ? this.props.log.map(function (log) {
+      var workLog = this.state.showLog && this.props.log ? this.props.log.map(function (log) {
         return _react2.default.createElement(_LogDetail2.default, { key: log.date.getTime().toString() + logIndex++, log: log });
       }) : null;
+
+      var logContainer = this.state.showLog ? _react2.default.createElement(
+        'div',
+        { className: 'task-detail-log' },
+        workLog
+      ) : null;
 
       return _react2.default.createElement(
         'div',
@@ -27933,15 +27917,7 @@ var TaskDetail = function (_React$Component) {
           value: this.state.title,
           onChange: function onChange(e) {
             if (e.target.value !== '') {
-              var stateObject = { title: e.target.value };
-              _this2.setState(stateObject);
-
-              if (_this2.titleTimeout) {
-                window.clearTimeout(_this2.titleTimeout);
-              }
-              _this2.titleTimeout = setTimeout(function () {
-                return _this2.updateTask(stateObject);
-              }, 500);
+              _this2.setState({ title: e.target.value });
             }
           } }),
         _react2.default.createElement(
@@ -27949,21 +27925,63 @@ var TaskDetail = function (_React$Component) {
           { className: 'task-detail-attributes' },
           _react2.default.createElement(
             'div',
-            { className: 'task-time' },
-            _react2.default.createElement('div', { className: 'task-time-img' }),
-            timeRating
+            { className: 'task-detail-attribute' },
+            _react2.default.createElement(
+              'label',
+              { className: 'task-detail-attribute-label' },
+              'Time'
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'task-detail-attribute-rating' },
+              _react2.default.createElement('div', { className: 'task-detail-time-img' }),
+              _react2.default.createElement(_Rating2.default, {
+                rating: this.state.time,
+                setRating: function setRating(stars) {
+                  _this2.changeDifficulty('time', stars);
+                }
+              })
+            )
           ),
           _react2.default.createElement(
             'div',
-            { className: 'task-effort' },
-            _react2.default.createElement('div', { className: 'task-effort-img' }),
-            effortRating
+            { className: 'task-detail-attribute' },
+            _react2.default.createElement(
+              'label',
+              { className: 'task-detail-attribute-label' },
+              'Effort'
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'task-detail-attribute-rating' },
+              _react2.default.createElement('div', { className: 'task-detail-effort-img' }),
+              _react2.default.createElement(_Rating2.default, {
+                rating: this.state.effort,
+                setRating: function setRating(stars) {
+                  _this2.changeDifficulty('effort', stars);
+                }
+              })
+            )
           ),
           _react2.default.createElement(
             'div',
-            { className: 'task-focus' },
-            _react2.default.createElement('div', { className: 'task-focus-img' }),
-            focusRating
+            { className: 'task-detail-attribute' },
+            _react2.default.createElement(
+              'label',
+              { className: 'task-detail-attribute-label' },
+              'Focus'
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'task-detail-attribute-rating' },
+              _react2.default.createElement('div', { className: 'task-detail-focus-img' }),
+              _react2.default.createElement(_Rating2.default, {
+                rating: this.state.focus,
+                setRating: function setRating(stars) {
+                  _this2.changeDifficulty('focus', stars);
+                }
+              })
+            )
           )
         ),
         _react2.default.createElement(
@@ -27978,7 +27996,7 @@ var TaskDetail = function (_React$Component) {
               'Start date'
             ),
             _react2.default.createElement(_DateInput2.default, { date: this.state.startDate, submit: function submit(date) {
-                _this2.setFieldAndSubmit('startDate', date);
+                _this2.setState({ startDate: date });
               } })
           ),
           _react2.default.createElement(
@@ -27990,32 +28008,76 @@ var TaskDetail = function (_React$Component) {
               'Due date'
             ),
             _react2.default.createElement(_DateInput2.default, { date: this.state.dueDate, submit: function submit(date) {
-                _this2.setFieldAndSubmit('dueDate', date);
+                _this2.setState({ dueDate: date });
               } })
           )
         ),
-        _react2.default.createElement('div', { className: 'task-detail-notes' }),
         _react2.default.createElement(
           'div',
-          { className: 'task-detail-log' },
-          addLog,
-          workLog
-        )
+          { className: 'task-detail-category' },
+          _react2.default.createElement(
+            'label',
+            { className: 'task-detail-category-label' },
+            'Category'
+          ),
+          _react2.default.createElement(
+            'select',
+            {
+              className: 'task-detail-category-dropdown',
+              value: this.state.category._id,
+              onChange: function onChange(e) {
+                _this2.setState({ category: e.target.value });
+              }
+            },
+            categoryOptions
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'task-detail-submit-controls' },
+          _react2.default.createElement(
+            'button',
+            {
+              className: 'task-detail-cancel',
+              type: 'button',
+              onClick: function onClick() {
+                _this2.props.closeDetail();
+              }
+            },
+            'Cancel'
+          ),
+          _react2.default.createElement(
+            'button',
+            {
+              className: 'task-detail-save',
+              type: 'button',
+              onClick: function onClick() {
+                _this2.updateTask();
+              }
+            },
+            'Save'
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'task-detail-log-controls' },
+          _react2.default.createElement('button', {
+            className: 'toggle-detail-log',
+            type: 'button',
+            onClick: function onClick() {
+              _this2.setState({ showLog: !_this2.state.showLog });
+            }
+          }),
+          _react2.default.createElement(
+            'label',
+            { className: 'toggle-detail-log-label' },
+            this.state.showLog ? 'Hide log' : 'Show log'
+          ),
+          showFormButton
+        ),
+        logForm,
+        logContainer
       );
-    }
-  }, {
-    key: 'setFieldAndSubmit',
-    value: function setFieldAndSubmit(field, value) {
-      var _this3 = this;
-
-      if (value !== this.state[field]) {
-        var stateObject = {};
-        stateObject[field] = value;
-
-        this.setState(stateObject, function () {
-          _this3.updateTask(stateObject);
-        });
-      }
     }
   }, {
     key: 'showLogForm',
@@ -28028,65 +28090,48 @@ var TaskDetail = function (_React$Component) {
       this.setState({ showLogForm: false });
     }
   }, {
-    key: 'hasChanged',
-    value: function hasChanged() {
-      var propFields = {
-        title: this.props.title,
-        time: this.props.time,
-        effort: this.props.effort,
-        focus: this.props.focus,
-        category: this.props.category,
-        complete: this.props.complete,
-        startDate: this.props.startDate,
-        dueDate: this.props.dueDate
-      };
-
-      var stateFields = {
-        title: this.state.title,
-        time: this.state.time,
-        effort: this.state.effort,
-        focus: this.state.focus,
-        category: this.state.category,
-        complete: this.state.complete,
-        startDate: this.state.startDate,
-        dueDate: this.state.dueDate
-      };
-
-      if (JSON.stringify(stateFields) === JSON.stringify(propFields)) {
-        this.setState({ dirty: false });
-      } else {
-        this.setState({ dirty: true });
-      }
+    key: 'changeDifficulty',
+    value: function changeDifficulty(field, amount) {
+      var updateField = {};
+      updateField[field] = amount;
+      this.setState(updateField);
     }
   }, {
     key: 'updateTask',
-    value: function updateTask(updateFields) {
-      this.props.updateTask(this.props._id, updateFields);
-    }
-  }, {
-    key: 'setLogDate',
-    value: function setLogDate(date) {
-      this.setState({ logDate: date });
-    }
-  }, {
-    key: 'addWorkLog',
-    value: function addWorkLog() {
-      var log = {};
-      log.date = this.state.logDate;
-      log.date.setSeconds(0);
-      var logDesc = this.state.logDesc;
-      var logTime = this.state.logTime;
+    value: function updateTask() {
+      var updateFields = {};
 
-      if (logDesc !== undefined && logDesc !== null && logDesc !== '') {
-        log.desc = logDesc;
+      if (this.state.title !== this.props.title) {
+        updateFields.title = this.state.title;
       }
 
-      if (logTime !== undefined && logTime !== null && logTime !== '') {
-        log.time = logTime;
+      if (this.state.time !== this.props.time) {
+        updateFields.time = this.state.time;
       }
 
-      if (log.date && (log.desc || log.time)) {
-        this.props.addLog(log);
+      if (this.state.effort !== this.props.effort) {
+        updateFields.effort = this.state.effort;
+      }
+
+      if (this.state.focus !== this.props.focus) {
+        updateFields.focus = this.state.focus;
+      }
+
+      if (this.state.category !== this.props.category) {
+        updateFields.category = this.state.category;
+      }
+
+      if (this.state.startDate !== this.props.startDate) {
+        updateFields.startDate = this.state.startDate;
+      }
+
+      if (this.state.dueDate !== this.props.dueDate) {
+        updateFields.dueDate = this.state.dueDate;
+      }
+
+      // If no fields were updated, don't bother
+      if (Object.keys(updateFields).length > 0) {
+        this.props.updateTask(this.props._id, updateFields);
       }
     }
   }]);
@@ -28098,6 +28143,273 @@ exports.default = TaskDetail;
 
 /***/ }),
 /* 244 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(6);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LogDetail = function (_React$Component) {
+  _inherits(LogDetail, _React$Component);
+
+  function LogDetail(props) {
+    _classCallCheck(this, LogDetail);
+
+    return _possibleConstructorReturn(this, (LogDetail.__proto__ || Object.getPrototypeOf(LogDetail)).call(this, props));
+  }
+
+  _createClass(LogDetail, [{
+    key: 'render',
+    value: function render() {
+      var dateOptions = {
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+
+      var timeString = this.props.log.time ? this.props.log.time + ' hrs' : '';
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'log-detail-wrapper' },
+        _react2.default.createElement(
+          'p',
+          { className: 'log-detail-date' },
+          this.props.log.date.toLocaleString('en-US', dateOptions)
+        ),
+        _react2.default.createElement(
+          'p',
+          { className: 'log-detail-desc' },
+          this.props.log.desc
+        ),
+        _react2.default.createElement(
+          'p',
+          { className: 'log-detail-time' },
+          timeString
+        )
+      );
+    }
+  }]);
+
+  return LogDetail;
+}(_react2.default.Component);
+
+exports.default = LogDetail;
+
+/***/ }),
+/* 245 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(6);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _DateTimeInput = __webpack_require__(246);
+
+var _DateTimeInput2 = _interopRequireDefault(_DateTimeInput);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LogForm = function (_React$Component) {
+  _inherits(LogForm, _React$Component);
+
+  function LogForm(props) {
+    _classCallCheck(this, LogForm);
+
+    // Set up references to detect when user clicks outside of calendar component
+    // See: https://stackoverflow.com/questions/32553158/detect-click-outside-react-component
+    var _this = _possibleConstructorReturn(this, (LogForm.__proto__ || Object.getPrototypeOf(LogForm)).call(this, props));
+
+    _this.clickOutside = _this.clickOutside.bind(_this);
+
+    _this.addWorkLog = _this.addWorkLog.bind(_this);
+    _this.setLogDate = _this.setLogDate.bind(_this);
+
+    _this.state = {
+      date: new Date(),
+      desc: '',
+      time: ''
+    };
+    return _this;
+  }
+
+  _createClass(LogForm, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      document.addEventListener('click', this.clickOutside);
+    }
+  }, {
+    key: 'componentWillUnount',
+    value: function componentWillUnount() {
+      document.removeEventListener('click', this.clickOutside);
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(newProps) {
+      if (newProps.addLogSuccess !== this.props.addLogSuccess && newProps.addLogSuccess) {
+        this.props.closeLogForm();
+      }
+    }
+
+    // Description should be longer/bigger
+    // Hours should be shorter
+
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'log-form-wrapper', ref: function ref(wrapper) {
+            _this2.wrapperRef = wrapper;
+          } },
+        _react2.default.createElement(
+          'label',
+          { className: 'log-datetime-label' },
+          'Log date'
+        ),
+        _react2.default.createElement(_DateTimeInput2.default, { date: this.state.date, submit: this.setLogDate }),
+        _react2.default.createElement(
+          'label',
+          { className: 'log-desc-label' },
+          'Log description'
+        ),
+        _react2.default.createElement('input', {
+          className: 'log-form-desc',
+          type: 'text',
+          placeholder: 'Work log description',
+          value: this.state.desc,
+          onChange: function onChange(e) {
+            _this2.setState({ desc: e.target.value });
+          }
+        }),
+        _react2.default.createElement(
+          'label',
+          { className: 'log-time-label' },
+          'Log hours'
+        ),
+        _react2.default.createElement('input', {
+          className: 'log-form-time',
+          type: 'text',
+          placeholder: '# hrs',
+          value: this.state.time,
+          onKeyDown: this.restrictInput,
+          onChange: function onChange(e) {
+            _this2.setState({ time: e.target.value });
+          }
+        }),
+        _react2.default.createElement(
+          'div',
+          { className: 'log-form-controls' },
+          _react2.default.createElement(
+            'button',
+            {
+              className: 'cancel-detail-log',
+              type: 'button',
+              onClick: function onClick() {
+                _this2.props.closeLogForm();
+              }
+            },
+            'Cancel'
+          ),
+          _react2.default.createElement(
+            'button',
+            {
+              className: 'add-detail-log',
+              type: 'button',
+              onClick: function onClick() {
+                _this2.addWorkLog();
+              }
+            },
+            'Log work'
+          )
+        )
+      );
+    }
+  }, {
+    key: 'clickOutside',
+    value: function clickOutside(event) {
+      if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+        this.props.closeLogForm();
+        event.stopPropagation();
+      }
+    }
+  }, {
+    key: 'setLogDate',
+    value: function setLogDate(date) {
+      this.setState({ date: date });
+    }
+  }, {
+    key: 'addWorkLog',
+    value: function addWorkLog() {
+      var log = {};
+      log.date = this.state.date;
+      log.date.setSeconds(0);
+      var desc = this.state.desc;
+      var time = this.state.time;
+
+      if (desc !== undefined && desc !== null && desc !== '') {
+        log.desc = desc;
+      }
+
+      if (time !== undefined && time !== null && time !== '') {
+        log.time = time;
+      }
+
+      this.setState({
+        date: new Date(),
+        desc: '',
+        time: ''
+      });
+
+      if (log.date && (log.desc || log.time)) {
+        this.props.addLog(log);
+      }
+    }
+  }]);
+
+  return LogForm;
+}(_react2.default.Component);
+
+exports.default = LogForm;
+
+/***/ }),
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28129,7 +28441,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * Class DateTimeInput
  * Wraps date, hour, and minute inputs.
  * @prop {Date}     date  Initial date value to populate input with. Optional.
- * @prop {Function} submit  Function to call when the "add reminder" button is clicked
+ * @prop {Function} submit  Function to call when a value is changed.
  */
 var DateTimeInput = function (_React$Component) {
   _inherits(DateTimeInput, _React$Component);
@@ -28166,6 +28478,36 @@ var DateTimeInput = function (_React$Component) {
   }
 
   _createClass(DateTimeInput, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(newProps) {
+      // If the component was given a new, non-null date, overwrite values.
+      if (newProps.date !== null) {
+        if (this.props.date.getTime() !== newProps.date.getTime()) {
+          var newDate = newProps.date;
+
+          var newHour = newDate.getHours();
+          var newMeridiem = 'am';
+
+          if (newHour > 11) {
+            newMeridiem = 'pm';
+          }
+          if (newHour > 12) {
+            newHour -= 12;
+          }
+          if (newHour === 0) {
+            newHour = 12;
+          }
+
+          this.setState({
+            date: newDate,
+            hour: newHour,
+            minute: newDate.getMinutes(),
+            meridiem: newMeridiem
+          });
+        }
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
       var _this2 = this;
@@ -28195,50 +28537,54 @@ var DateTimeInput = function (_React$Component) {
 
       return _react2.default.createElement(
         'div',
-        { className: 'reminder-wrapper' },
+        { className: 'datetime-input-wrapper' },
         _react2.default.createElement(_DateInput2.default, { date: this.state.date, submit: function submit(date) {
             _this2.setState({ date: date }, _this2.submit);
           } }),
         _react2.default.createElement(
-          'select',
-          {
-            className: 'reminder-hour-dropdown',
-            value: this.state.hour,
-            onChange: function onChange(event) {
-              _this2.setState({ hour: parseInt(event.target.value) }, _this2.submit);
-            }
-          },
-          hourOptions
-        ),
-        _react2.default.createElement(
-          'select',
-          {
-            className: 'reminder-min-dropdown',
-            value: this.state.minute,
-            onChange: function onChange(event) {
-              _this2.setState({ minute: parseInt(event.target.value) }, _this2.submit);
-            }
-          },
-          minuteOptions
-        ),
-        _react2.default.createElement(
-          'select',
-          {
-            className: 'reminder-meridiem-dropdown',
-            value: this.state.meridiem,
-            onChange: function onChange(event) {
-              _this2.setState({ meridiem: event.target.value }, _this2.submit);
-            }
-          },
+          'div',
+          { className: 'datetime-dropdowns' },
           _react2.default.createElement(
-            'option',
-            { value: 'am' },
-            'AM'
+            'select',
+            {
+              className: 'datetime-hour-dropdown',
+              value: this.state.hour,
+              onChange: function onChange(event) {
+                _this2.setState({ hour: parseInt(event.target.value) }, _this2.submit);
+              }
+            },
+            hourOptions
           ),
           _react2.default.createElement(
-            'option',
-            { value: 'pm' },
-            'PM'
+            'select',
+            {
+              className: 'datetime-min-dropdown',
+              value: this.state.minute,
+              onChange: function onChange(event) {
+                _this2.setState({ minute: parseInt(event.target.value) }, _this2.submit);
+              }
+            },
+            minuteOptions
+          ),
+          _react2.default.createElement(
+            'select',
+            {
+              className: 'datetime-meridiem-dropdown',
+              value: this.state.meridiem,
+              onChange: function onChange(event) {
+                _this2.setState({ meridiem: event.target.value }, _this2.submit);
+              }
+            },
+            _react2.default.createElement(
+              'option',
+              { value: 'am' },
+              'AM'
+            ),
+            _react2.default.createElement(
+              'option',
+              { value: 'pm' },
+              'PM'
+            )
           )
         )
       );
@@ -28269,71 +28615,7 @@ var DateTimeInput = function (_React$Component) {
 exports.default = DateTimeInput;
 
 /***/ }),
-/* 245 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(6);
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var LogDetail = function (_React$Component) {
-  _inherits(LogDetail, _React$Component);
-
-  function LogDetail(props) {
-    _classCallCheck(this, LogDetail);
-
-    return _possibleConstructorReturn(this, (LogDetail.__proto__ || Object.getPrototypeOf(LogDetail)).call(this, props));
-  }
-
-  _createClass(LogDetail, [{
-    key: 'render',
-    value: function render() {
-      return _react2.default.createElement(
-        'div',
-        { className: 'log-detail-wrapper' },
-        _react2.default.createElement(
-          'p',
-          null,
-          this.props.log.date.toLocaleString()
-        ),
-        _react2.default.createElement(
-          'p',
-          null,
-          this.props.log.desc
-        ),
-        _react2.default.createElement(
-          'p',
-          null,
-          this.props.log.time
-        )
-      );
-    }
-  }]);
-
-  return LogDetail;
-}(_react2.default.Component);
-
-exports.default = LogDetail;
-
-/***/ }),
-/* 246 */
+/* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28466,7 +28748,7 @@ var CategoryList = function (_React$Component) {
 exports.default = CategoryList;
 
 /***/ }),
-/* 247 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28631,7 +28913,7 @@ var TaskControls = function (_React$Component) {
 exports.default = TaskControls;
 
 /***/ }),
-/* 248 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -28800,7 +29082,7 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ }),
-/* 249 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -29426,7 +29708,7 @@ RequestBase.prototype._setTimeouts = function() {
 
 
 /***/ }),
-/* 250 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -29434,7 +29716,7 @@ RequestBase.prototype._setTimeouts = function() {
  * Module dependencies.
  */
 
-var utils = __webpack_require__(251);
+var utils = __webpack_require__(252);
 
 /**
  * Expose `ResponseBase`.
@@ -29565,7 +29847,7 @@ ResponseBase.prototype._setStatusProperties = function(status){
 
 
 /***/ }),
-/* 251 */
+/* 252 */
 /***/ (function(module, exports) {
 
 
@@ -29638,7 +29920,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
 };
 
 /***/ }),
-/* 252 */
+/* 253 */
 /***/ (function(module, exports) {
 
 var ERROR_CODES = [
@@ -29667,7 +29949,7 @@ module.exports = function shouldRetry(err, res) {
 
 
 /***/ }),
-/* 253 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29724,7 +30006,7 @@ exports.addCategory = addCategory;
 exports.getCategories = getCategories;
 
 /***/ }),
-/* 254 */
+/* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29839,7 +30121,7 @@ exports.toggleComplete = toggleComplete;
 exports.changeCategory = changeCategory;
 
 /***/ }),
-/* 255 */
+/* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29910,7 +30192,7 @@ exports.changeSortBy = changeSortBy;
 exports.changeEmphasis = changeEmphasis;
 
 /***/ }),
-/* 256 */
+/* 257 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30056,16 +30338,16 @@ var Auth = (_dec = (0, _reactRedux.connect)(function (store) {
 exports.default = Auth;
 
 /***/ }),
-/* 257 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(258);
+var content = __webpack_require__(259);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
-var update = __webpack_require__(260)(content, {});
+var update = __webpack_require__(261)(content, {});
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -30082,21 +30364,21 @@ if(false) {
 }
 
 /***/ }),
-/* 258 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(259)();
+exports = module.exports = __webpack_require__(260)();
 // imports
 
 
 // module
-exports.push([module.i, "* {\n  margin: 0;\n  padding: 0; }\n\nbody {\n  background-color: #ECECEC;\n  font-family: \"Montserrat\", sans-serif;\n  font-size: 13pt; }\n\n.form-input {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-bottom: 14px; }\n\n.main-view {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: start;\n      -ms-flex-align: start;\n          align-items: flex-start;\n  width: 850px;\n  margin: auto; }\n\n.sidebar {\n  width: 200px;\n  margin-right: 6px; }\n\n.task-controls-wrapper {\n  width: 200px; }\n\n.category-list-wrapper {\n  width: calc(200px - 15px);\n  margin-top: 10px;\n  padding-top: 10px;\n  border-top: 1px solid #808080; }\n\n.category-item {\n  margin: 2px;\n  border-radius: 4px; }\n  .category-item:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.active-category {\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 4px; }\n  .active-category:hover {\n    background-color: #808080;\n    cursor: default; }\n\n.task-wrapper {\n  background-color: #FAFAFA;\n  font-size: 10pt;\n  width: 100%;\n  height: 60px;\n  margin-bottom: 5px; }\n  .task-wrapper:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.task-title {\n  margin-top: 5px;\n  margin-left: 5px;\n  font-size: 13pt; }\n\n.task-time {\n  display: -webkit-inline-box;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-left: 10px;\n  margin-top: 4px;\n  margin-left: 15px; }\n\n.task-effort {\n  display: -webkit-inline-box;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-left: 10px;\n  margin-top: 4px; }\n\n.task-focus {\n  display: -webkit-inline-box;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-left: 10px;\n  margin-top: 4px; }\n\n.task-time-img {\n  display: inline-block;\n  height: 20px;\n  margin-right: 5px;\n  width: 20px;\n  background: url(\"/assets/img/time-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-effort-img {\n  display: inline-block;\n  height: 20px;\n  margin-right: 5px;\n  width: 20px;\n  background: url(\"/assets/img/effort-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-focus-img {\n  display: inline-block;\n  height: 20px;\n  margin-right: 5px;\n  width: 20px;\n  background: url(\"/assets/img/focus-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-rating-full {\n  width: 15px;\n  height: 15px;\n  background: url(\"/assets/img/star-full-15px.png\");\n  background-repeat: no-repeat; }\n\n.task-rating-empty {\n  width: 15px;\n  height: 15px;\n  background: url(\"/assets/img/star-empty-15px.png\");\n  background-repeat: no-repeat; }\n\n.task-detail-wrapper {\n  background-color: #FAFAFA;\n  font-size: 10pt;\n  width: 100%;\n  margin-bottom: 5px; }\n\n.task-detail-title {\n  background-color: #FAFAFA;\n  font-size: 13pt;\n  font-family: \"Montserrat\", sans-serif;\n  width: calc(100% - calc(5px * 2));\n  margin-top: 5px;\n  margin-left: 5px;\n  border: none;\n  border-bottom-color: #6B6B6B;\n  border-bottom-width: 2px;\n  border-bottom-style: solid; }\n  .task-detail-title:focus {\n    outline: none; }\n\n.task-detail-attributes {\n  margin-bottom: 10px; }\n\n.task-detail-dates {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-bottom: 10px; }\n\n.task-detail-date {\n  margin-left: 40px; }\n  .task-detail-date .date-input-wrapper {\n    margin-left: 4px; }\n\n.task-form-wrapper {\n  position: fixed;\n  left: 50%;\n  top: 50%;\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n  width: 650px;\n  height: 650px;\n  background-color: #FAFAFA;\n  border-radius: 5px;\n  z-index: 2; }\n\n.task-list-wrapper {\n  width: 650px; }\n\n.task-list {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 100%; }\n\n.calendar-wrapper {\n  position: absolute;\n  width: 300px;\n  z-index: 3;\n  background-color: white;\n  border: 1px solid #808080;\n  border-radius: 3px; }\n\n.month-picker {\n  width: 300px;\n  height: 30px;\n  background-color: white;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  line-height: 30px; }\n\n.month-adjust {\n  width: 20px;\n  border-style: none; }\n  .month-adjust:hover {\n    cursor: pointer; }\n\n.curr-month {\n  text-align: center; }\n\n.week-header {\n  width: 300px;\n  height: 30px;\n  background-color: #E0E0E0;\n  display: -ms-grid;\n  display: grid;\n  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n  -ms-grid-rows: 20px;\n      grid-template-rows: 20px;\n  -ms-grid-column-align: center;\n      justify-items: center;\n  line-height: 30px; }\n\n.week-header-day {\n  width: 40px;\n  text-align: center; }\n\n.calendar-input-week {\n  display: -ms-grid;\n  display: grid;\n  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n  -ms-grid-rows: 20px;\n      grid-template-rows: 20px;\n  -ms-grid-column-align: center;\n      justify-items: center;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 300px;\n  margin-bottom: 4px;\n  text-align: center; }\n\n.calendar-day {\n  width: 40px;\n  border-radius: 2px;\n  text-align: center; }\n  .calendar-day:hover {\n    background-color: #4183D7;\n    cursor: pointer; }\n\n.off-month {\n  color: #E0E0E0; }\n\n.current-day {\n  border: 1px solid #808080; }\n\n.date-error-text {\n  color: #CF000F;\n  font-size: 10pt; }\n\n.date-input-show-calendar:hover {\n  cursor: pointer; }\n", ""]);
+exports.push([module.i, "* {\n  margin: 0;\n  padding: 0; }\n\nbody {\n  background-color: #ECECEC;\n  font-family: \"Montserrat\", sans-serif;\n  font-size: 13pt; }\n\n.form-input {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-bottom: 14px; }\n\n.main-view {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: start;\n      -ms-flex-align: start;\n          align-items: flex-start;\n  width: 850px;\n  margin: auto; }\n\n.log-form-wrapper {\n  position: fixed;\n  left: 50%;\n  top: 40%;\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n  z-index: 2;\n  background-color: #FAFAFA;\n  border-radius: 4px;\n  padding: 10px;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  margin-left: 60px; }\n  .log-form-wrapper .datetime-input-wrapper {\n    margin-top: 2px;\n    margin-left: 4px;\n    margin-bottom: 4px; }\n\n.log-form-desc {\n  width: 210px;\n  height: 20px;\n  background-color: #EEEEEE;\n  color: #555555;\n  margin-top: 2px;\n  margin-left: 4px;\n  margin-bottom: 6px;\n  padding: 4px 6px;\n  border: 1px solid #808080;\n  border-radius: 3px;\n  vertical-align: bottom;\n  text-indent: 2px; }\n\n.log-form-time {\n  width: 210px;\n  height: 20px;\n  background-color: #EEEEEE;\n  color: #555555;\n  margin-top: 2px;\n  margin-right: 4px;\n  margin-bottom: 12px;\n  padding: 4px 6px;\n  border: 1px solid #808080;\n  border-radius: 3px;\n  vertical-align: bottom;\n  text-indent: 2px; }\n\n.log-form-controls {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: end;\n      -ms-flex-pack: end;\n          justify-content: flex-end;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-left: 4px;\n  margin-top: 3px; }\n\n.cancel-detail-log {\n  background: none;\n  border: none;\n  height: 30px; }\n  .cancel-detail-log:hover {\n    text-decoration: underline;\n    cursor: pointer; }\n\n.add-detail-log {\n  display: inline;\n  background: none;\n  border: none;\n  width: 75px;\n  height: 30px;\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 3px;\n  margin-left: 8px; }\n  .add-detail-log:hover {\n    background-color: #A0A0A0;\n    cursor: pointer; }\n\n.rating-wrapper {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center; }\n\n.rating-inert {\n  width: 20px;\n  height: 20px;\n  background-image: url(\"/assets/img/star-full-20px.png\");\n  background-repeat: no-repeat;\n  background-position: center; }\n\n.rating-full {\n  width: 20px;\n  height: 20px;\n  background-image: url(\"/assets/img/star-full-20px.png\");\n  background-repeat: no-repeat;\n  background-position: center; }\n  .rating-full:hover {\n    cursor: pointer; }\n\n.rating-empty {\n  width: 20px;\n  height: 20px;\n  background-image: url(\"/assets/img/star-empty-20px.png\");\n  background-repeat: no-repeat;\n  background-position: center; }\n\n.sidebar {\n  width: 200px;\n  margin-right: 6px; }\n\n.task-controls-wrapper {\n  width: 200px; }\n\n.category-list-wrapper {\n  width: calc(200px - 15px);\n  margin-top: 10px;\n  padding-top: 10px;\n  border-top: 1px solid #808080; }\n\n.category-item {\n  margin: 2px;\n  border-radius: 4px; }\n  .category-item:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.active-category {\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 4px; }\n  .active-category:hover {\n    background-color: #808080;\n    cursor: default; }\n\n.task-wrapper {\n  background-color: #FAFAFA;\n  font-size: 10pt;\n  width: 100%;\n  height: 60px;\n  margin-bottom: 5px; }\n  .task-wrapper:hover {\n    background-color: #E0E0E0;\n    cursor: pointer; }\n\n.task-title {\n  display: inline-block;\n  margin-top: 5px;\n  margin-left: 5px;\n  font-size: 13pt; }\n\n.task-toggle-complete {\n  background: none;\n  border: none;\n  width: 30px;\n  height: 30px;\n  float: right;\n  margin-top: calc(calc(60px / 2) - calc(30px / 2));\n  margin-right: 5px;\n  background-image: url(\"/assets/img/toggle-checked-30px.png\");\n  background-position: center;\n  background-repeat: no-repeat; }\n  .task-toggle-complete:hover {\n    cursor: pointer;\n    background-image: url(\"/assets/img/toggle-empty-30px.png\"); }\n\n.task-toggle-uncomplete {\n  background: none;\n  border: none;\n  width: 30px;\n  height: 30px;\n  float: right;\n  margin-top: calc(calc(60px / 2) - calc(30px / 2));\n  margin-right: 5px;\n  background-image: url(\"/assets/img/toggle-empty-30px.png\");\n  background-position: center;\n  background-repeat: no-repeat; }\n  .task-toggle-uncomplete:hover {\n    cursor: pointer;\n    background-image: url(\"/assets/img/toggle-checked-30px.png\"); }\n\n.task-time {\n  display: -webkit-inline-box;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-left: 10px;\n  margin-top: 4px;\n  margin-left: 15px; }\n\n.task-effort {\n  display: -webkit-inline-box;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-left: 10px;\n  margin-top: 4px; }\n\n.task-focus {\n  display: -webkit-inline-box;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-left: 10px;\n  margin-top: 4px; }\n\n.task-time-img {\n  display: inline-block;\n  height: 20px;\n  margin-right: 5px;\n  width: 20px;\n  background: url(\"/assets/img/time-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-effort-img {\n  display: inline-block;\n  height: 20px;\n  margin-right: 5px;\n  width: 20px;\n  background: url(\"/assets/img/effort-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-focus-img {\n  display: inline-block;\n  height: 20px;\n  margin-right: 5px;\n  width: 20px;\n  background: url(\"/assets/img/focus-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-rating-full {\n  width: 15px;\n  height: 15px;\n  background: url(\"/assets/img/star-full-15px.png\");\n  background-repeat: no-repeat; }\n\n.task-rating-empty {\n  width: 15px;\n  height: 15px;\n  background: url(\"/assets/img/star-empty-15px.png\");\n  background-repeat: no-repeat; }\n\n.task-detail-wrapper {\n  background-color: #FAFAFA;\n  font-size: 10pt;\n  width: 100%;\n  margin-bottom: 10px; }\n\n.task-detail-title {\n  background-color: #FAFAFA;\n  font-size: 13pt;\n  font-family: \"Montserrat\", sans-serif;\n  width: calc(100% - calc(5px * 2));\n  margin-top: 5px;\n  margin-left: 5px;\n  border: none;\n  border-bottom-color: #6B6B6B;\n  border-bottom-width: 2px;\n  border-bottom-style: solid; }\n  .task-detail-title:focus {\n    outline: none; }\n\n.task-detail-attributes {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-pack: distribute;\n      justify-content: space-around;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-top: 8px;\n  margin-bottom: 15px; }\n\n.task-detail-attribute-rating {\n  margin-top: 3px;\n  margin-left: 10px;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-align: end;\n      -ms-flex-align: end;\n          align-items: flex-end; }\n\n.task-detail-time-img {\n  width: 20px;\n  height: 20px;\n  margin-right: 5px;\n  background: url(\"/assets/img/time-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-detail-effort-img {\n  display: inline-block;\n  width: 20px;\n  height: 20px;\n  margin-right: 5px;\n  background: url(\"/assets/img/effort-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-detail-focus-img {\n  display: inline-block;\n  width: 20px;\n  height: 20px;\n  margin-right: 5px;\n  background: url(\"/assets/img/focus-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-detail-rating-full {\n  width: 20px;\n  height: 20px;\n  background: url(\"/assets/img/star-full-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-detail-full-editable:hover {\n  cursor: pointer;\n  background: url(\"/assets/img/star-empty-20px.png\"); }\n\n.task-detail-rating-empty {\n  width: 20px;\n  height: 20px;\n  background: url(\"/assets/img/star-empty-20px.png\");\n  background-repeat: no-repeat; }\n\n.task-detail-empty-editable:hover {\n  cursor: pointer;\n  background: url(\"/assets/img/star-full-20px.png\"); }\n\n.task-detail-dates {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-align: top;\n      -ms-flex-align: top;\n          align-items: top;\n  margin-bottom: 15px; }\n\n.task-detail-date {\n  margin-left: 70px; }\n  .task-detail-date .date-input-wrapper {\n    margin-top: 2px;\n    margin-left: 4px; }\n\n.task-detail-category {\n  margin-bottom: 15px; }\n\n.task-detail-category-label {\n  margin-left: 70px; }\n\n.task-detail-category-dropdown {\n  display: block;\n  height: 30px;\n  width: 165px;\n  background-color: #EEEEEE;\n  color: #555555;\n  margin-top: 2px;\n  margin-bottom: 6px;\n  margin-left: calc(70px + 4px);\n  border: 1px solid #808080;\n  border-radius: 3px; }\n\n.task-detail-submit-controls {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: end;\n      -ms-flex-pack: end;\n          justify-content: flex-end;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-right: 40px; }\n\n.task-detail-cancel {\n  background: none;\n  border: none;\n  height: 30px; }\n  .task-detail-cancel:hover {\n    text-decoration: underline;\n    cursor: pointer; }\n\n.task-detail-save {\n  display: inline;\n  background: none;\n  border: none;\n  width: 75px;\n  height: 30px;\n  background-color: #808080;\n  color: #FAFAFA;\n  border-radius: 3px;\n  margin-left: 15px; }\n  .task-detail-save:hover {\n    background-color: #A0A0A0;\n    cursor: pointer; }\n\n.task-detail-log-controls {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  margin-top: 5px; }\n\n.toggle-detail-log {\n  border: none;\n  background: none;\n  width: 25px;\n  height: 25px;\n  margin-left: 6px;\n  background-image: url(\"/assets/img/list-20px.png\");\n  background-repeat: no-repeat;\n  background-position: center; }\n  .toggle-detail-log:hover {\n    cursor: pointer; }\n\n.toggle-detail-log-label {\n  margin-right: auto;\n  margin-left: 5px; }\n\n.show-log-form {\n  border: none;\n  background: none;\n  width: 25px;\n  height: 25px;\n  margin-right: 6px;\n  background-image: url(\"/assets/img/add-20px.png\");\n  background-repeat: no-repeat;\n  background-position: center; }\n  .show-log-form:hover {\n    cursor: pointer; }\n\n.task-detail-log {\n  min-height: 4px;\n  margin-top: 2px;\n  margin-bottom: 4px; }\n\n.lightbox-dim {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.5);\n  z-index: 1; }\n\n.log-detail-wrapper {\n  width: calc(100% - 4px);\n  margin-left: 2px;\n  display: -ms-grid;\n  display: grid;\n  -ms-grid-columns: 160px auto 50px;\n      grid-template-columns: 160px auto 50px;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  border-top: 1px #C0C0C0 solid;\n  margin-bottom: 7px;\n  padding-top: 3px; }\n\n.log-detail-date {\n  margin-left: 15px; }\n\n.log-detail-time {\n  justify-self: center; }\n\n.task-form-wrapper {\n  position: fixed;\n  left: 50%;\n  top: 50%;\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n  width: 650px;\n  height: 650px;\n  background-color: #FAFAFA;\n  border-radius: 5px;\n  z-index: 2; }\n\n.task-list-wrapper {\n  width: 650px; }\n\n.task-list {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-pack: start;\n      -ms-flex-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 100%; }\n\n.calendar-wrapper {\n  position: absolute;\n  width: 300px;\n  z-index: 3;\n  background-color: white;\n  border: 1px solid #808080;\n  border-radius: 3px; }\n\n.month-picker {\n  width: 300px;\n  height: 30px;\n  background-color: white;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  line-height: 30px; }\n\n.month-adjust {\n  width: 20px;\n  border-style: none; }\n  .month-adjust:hover {\n    cursor: pointer; }\n\n.curr-month {\n  text-align: center; }\n\n.week-header {\n  width: 300px;\n  height: 30px;\n  background-color: #E0E0E0;\n  display: -ms-grid;\n  display: grid;\n  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n  -ms-grid-rows: 20px;\n      grid-template-rows: 20px;\n  -ms-grid-column-align: center;\n      justify-items: center;\n  line-height: 30px; }\n\n.week-header-day {\n  width: 40px;\n  text-align: center; }\n\n.calendar-input-week {\n  display: -ms-grid;\n  display: grid;\n  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n  -ms-grid-rows: 20px;\n      grid-template-rows: 20px;\n  -ms-grid-column-align: center;\n      justify-items: center;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  width: 300px;\n  margin-bottom: 4px;\n  text-align: center; }\n\n.calendar-day {\n  width: 40px;\n  border-radius: 2px;\n  text-align: center; }\n  .calendar-day:hover {\n    background-color: #4183D7;\n    cursor: pointer; }\n\n.off-month {\n  color: #E0E0E0; }\n\n.current-day {\n  border: 1px solid #808080; }\n\n.date-error-text {\n  color: #CF000F;\n  font-size: 10pt; }\n\n.date-input-text {\n  width: 120px;\n  height: 20px;\n  background-color: #EEEEEE;\n  color: #555555;\n  padding: 4px 6px;\n  border: 1px solid #808080;\n  border-top-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n  vertical-align: bottom;\n  text-indent: 2px; }\n\n.date-input-show-calendar {\n  height: 30px;\n  width: 30px;\n  background-color: #EEEEEE;\n  border: 1px solid #808080;\n  border-left-style: none;\n  border-top-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n  vertical-align: bottom;\n  text-align: center;\n  line-height: 30px;\n  background-image: url(\"/assets/img/dateinput/calendar-20px.png\");\n  background-repeat: no-repeat;\n  background-position: center; }\n  .date-input-show-calendar:focus {\n    outline: none; }\n  .date-input-show-calendar:hover {\n    cursor: pointer; }\n\n.datetime-input-wrapper .date-input-wrapper {\n  display: inline; }\n\n.datetime-dropdowns {\n  display: inline;\n  margin-left: 2px; }\n  .datetime-dropdowns select {\n    height: 30px;\n    background-color: #EEEEEE;\n    color: #555555;\n    border-radius: 3px; }\n", ""]);
 
 // exports
 
 
 /***/ }),
-/* 259 */
+/* 260 */
 /***/ (function(module, exports) {
 
 /*
@@ -30152,7 +30434,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 260 */
+/* 261 */
 /***/ (function(module, exports) {
 
 /*
@@ -30402,6 +30684,106 @@ function updateLink(linkElement, obj) {
 		URL.revokeObjectURL(oldSrc);
 }
 
+
+/***/ }),
+/* 262 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(6);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Rating = function (_React$Component) {
+  _inherits(Rating, _React$Component);
+
+  function Rating(props) {
+    _classCallCheck(this, Rating);
+
+    var _this = _possibleConstructorReturn(this, (Rating.__proto__ || Object.getPrototypeOf(Rating)).call(this, props));
+
+    _this.state = {
+      min: _this.props.min ? _this.props.min : 1,
+      max: _this.props.max ? _this.props.max : 3,
+      rating: _this.props.rating
+    };
+    return _this;
+  }
+
+  _createClass(Rating, [{
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var rating = [];
+      for (var i = 1; i < this.state.min; i++) {
+        rating.push(_react2.default.createElement('span', { className: 'rating-inert', key: i }));
+      }
+
+      var _loop = function _loop(_i) {
+        var ratingClass = _i > _this2.state.rating ? 'rating-empty' : 'rating-full';
+        rating.push(_react2.default.createElement('span', {
+          className: ratingClass,
+          key: _i,
+          onMouseOver: function onMouseOver() {
+            _this2.setPreview(_i);
+          },
+          onMouseLeave: function onMouseLeave() {
+            _this2.resetPreview();
+          },
+          onClick: function onClick() {
+            _this2.setAmount(_i);
+          }
+        }));
+      };
+
+      for (var _i = this.state.min; _i <= this.state.max; _i++) {
+        _loop(_i);
+      }
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'rating-wrapper' },
+        rating
+      );
+    }
+  }, {
+    key: 'setPreview',
+    value: function setPreview(rating) {
+      this.setState({ rating: rating });
+    }
+  }, {
+    key: 'resetPreview',
+    value: function resetPreview() {
+      this.setState({ rating: this.props.rating });
+    }
+  }, {
+    key: 'setAmount',
+    value: function setAmount(rating) {
+      this.props.setRating(rating);
+    }
+  }]);
+
+  return Rating;
+}(_react2.default.Component);
+
+exports.default = Rating;
 
 /***/ })
 /******/ ]);

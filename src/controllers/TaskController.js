@@ -80,7 +80,7 @@ const updateTask = (_request, _response) => {
   const request = _request;
   const response = _response;
 
-  const id = request.body.id.toString();
+  const id = `${request.body.id}`;
 
   const taskData = {};
 
@@ -113,8 +113,8 @@ const updateTask = (_request, _response) => {
   }
 
   if (request.body.category) {
-    if (request.body.category._id) {
-      taskData.category = request.body.category._id.toString();
+    if (request.body.category) {
+      taskData.category = request.body.category.toString();
     } else {
       return response.status(400).json({ error: 'Invalid data supplied' });
     }
@@ -143,6 +143,10 @@ const updateTask = (_request, _response) => {
   if (taskData.startDate !== undefined && taskData.dueDate !== undefined
       && taskData.startDate.getTime() > taskData.dueDate.getTime()) {
     return response.status(400).json({ error: 'Start date cannot be after than due date' });
+  }
+
+  if (Object.keys(taskData).length <= 0) {
+    return response.status(400).json({ error: 'Must supply at least one field' });
   }
 
   const search = { user: request.user._id, _id: id };
