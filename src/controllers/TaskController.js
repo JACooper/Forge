@@ -113,8 +113,8 @@ const updateTask = (_request, _response) => {
   }
 
   if (request.body.category) {
-    if (request.body.category) {
-      taskData.category = request.body.category.toString();
+    if (request.body.category._id) {
+      taskData.category = request.body.category._id.toString();
     } else {
       return response.status(400).json({ error: 'Invalid data supplied' });
     }
@@ -128,6 +128,8 @@ const updateTask = (_request, _response) => {
     } else {
       return response.status(400).json({ error: 'Invalid start date supplied' });
     }
+  } else if (request.body.startDate === null) {
+    taskData.startDate = null;
   }
 
   if (request.body.dueDate) {
@@ -138,9 +140,11 @@ const updateTask = (_request, _response) => {
     } else {
       return response.status(400).json({ error: 'Invalid due date supplied' });
     }
+  } else if (request.body.dueDate === null) {
+    taskData.dueDate = null;
   }
 
-  if (taskData.startDate !== undefined && taskData.dueDate !== undefined
+  if (taskData.startDate && taskData.dueDate
       && taskData.startDate.getTime() > taskData.dueDate.getTime()) {
     return response.status(400).json({ error: 'Start date cannot be after than due date' });
   }
