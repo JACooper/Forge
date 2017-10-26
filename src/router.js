@@ -24,16 +24,16 @@ const router = (app) => {
   // changePassword authenticates for PoC testing purposes
   
   // -- Task routes --
-  app.post('/task', controllers.Task.createTask);
-  app.get('/tasks', controllers.Task.getTasks);
-  app.post('/update', controllers.Task.updateTask);
-  app.post('/log', controllers.Task.addLog);
-  app.post('/complete', controllers.Task.toggleComplete);
-  app.post('/changeCategory', controllers.Task.changeCategory);
+  app.post('/task', middleware.validation.isAuth, controllers.Task.createTask);
+  app.get('/tasks', middleware.validation.isAuth, controllers.Task.getTasks);
+  app.post('/update', middleware.validation.isAuth, controllers.Task.updateTask);
+  app.post('/log', middleware.validation.isAuth, controllers.Task.addLog);
+  app.post('/complete', middleware.validation.isAuth, controllers.Task.toggleComplete);
+  app.post('/changeCategory', middleware.validation.isAuth, controllers.Task.changeCategory);
 
   // -- Category routes --
-  app.post('/category', controllers.Category.createCategory);
-  app.get('/categories', controllers.Category.getCategories);
+  app.post('/category', middleware.validation.isAuth, controllers.Category.createCategory);
+  app.get('/categories', middleware.validation.isAuth, controllers.Category.getCategories);
 
   // -- Misc routes --
   //app.get('/', SomeDefault)
