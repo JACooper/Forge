@@ -4,10 +4,16 @@ Forge server
 Server repository for Forge, a task tracking app that helps you prioritize on the things you can do right now. Most solutions, be they simple todo lists or complex kanban workflows, operate under the principle of the user conforming to the application model. Forge takes a different approach: tasks are assigned difficulties in three categories (time, effort, and focus), and are presented to the user based on what they specify they're prepared to tackle at that point in their day.
 
 
+Client
+------
+
+The source for the client can be found [here](https://github.com/JACooper/Forge-client).
+
+
 Stack
 -----
 
-The Forge server is built using Node, Express, Redis, and MongoDB, with Mongoose as the ODM. Familiarity with ES6 syntax is strongly recommended to make sense of and edits to the source.
+The Forge server is built using Node, Express, Redis, and MongoDB, with Mongoose as the ODM. Familiarity with ES6 syntax is strongly recommended to make sense of the source and edit it.
 
 
 Running Locally
